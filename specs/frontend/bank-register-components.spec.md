@@ -76,8 +76,8 @@ Responsibilities:
 - render primary button `Add <Selected Type>`
 - render chevron dropdown with transaction type list
 - update selected transaction type from dropdown
-- create transaction on primary click
-- create transaction immediately when selecting a type in dropdown
+- open inline draft row on primary click
+- open inline draft row when selecting a type in dropdown
 - consume account transaction type resolver (`getSupportedTransactionTypesForAccount(account)`)
 
 For `Cash on hand (Bank)` the dropdown list must include:
@@ -115,8 +115,14 @@ For `Charitable donations (Equity)` the dropdown list must include:
 Responsibilities:
 
 - render ledger-oriented rows
+- render two-level column headers (`Ref No/Type` and `Payee/Account`)
+- render header labels top-aligned
 - support row click for detail panel
-- reflect auto-inserted rows from toolbar actions
+- render inline draft row at top when action is initiated
+- handle inline draft field editing by column
+- expose `Save` and `Cancel` actions for draft row
+- show field validation messages and balance preview before save
+- lock draft save action while request is in-flight
 
 ---
 

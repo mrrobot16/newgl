@@ -223,8 +223,8 @@ The screen includes a global "Balance General" summary.
 Rules:
 
 - Starts at 0.00 when the app boots
-- Aggregates current balances across the active account list
-- Updates reactively when ledger events update account balances
+- Represents current balance of the selected account register
+- Uses latest register running balance as primary source (fallback to selected account balance)
 
 ---
 

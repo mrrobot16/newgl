@@ -17,11 +17,18 @@ export function BankRegisterLayout() {
     selectedTransaction,
     selectedTransactionType,
     selectedPostings,
+    draftBalancePreview,
+    draftErrors,
+    draftTransaction,
     error,
+    isSavingDraft,
     setSelectedAccountId,
     addSelectedTransaction,
+    cancelDraftTransaction,
     selectTransactionType,
+    saveDraftTransaction,
     selectTransaction,
+    updateDraftField,
     voidTransaction,
     reverseTransaction
   } = useBankRegister();
@@ -65,7 +72,17 @@ export function BankRegisterLayout() {
       </div>
 
       <section className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-        <RegisterTable entries={entries} onSelect={selectTransaction} />
+        <RegisterTable
+          entries={entries}
+          onSelect={selectTransaction}
+          draftTransaction={draftTransaction}
+          draftErrors={draftErrors}
+          draftBalancePreview={draftBalancePreview}
+          isSavingDraft={isSavingDraft}
+          onDraftFieldChange={updateDraftField}
+          onDraftSave={saveDraftTransaction}
+          onDraftCancel={cancelDraftTransaction}
+        />
         <DetailPanel
           transaction={selectedTransaction}
           postings={selectedPostings}

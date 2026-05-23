@@ -27,9 +27,9 @@ The screen is divided into 5 main sections:
 
 ## 1. General Balance Overview (Top Summary)
 
-- Shows a single "Balance General" amount across all visible accounts
+- Shows a single "Balance General" amount for the currently selected account register
 - Initial value must be 0.00 at startup
-- Value updates as account balances update
+- Value updates from latest running balance in selected register (fallback: selected account balance)
 
 ---
 
@@ -103,7 +103,7 @@ Behavior:
 - Clicking chevron opens the available transaction types for the selected account
 - Selecting a type in the menu:
   - updates the primary button label
-  - immediately creates a new row with auto-filled transaction data
+  - opens a new inline draft row at the top of the register table
 
 Transaction type availability is account-driven:
 
@@ -145,16 +145,24 @@ This is the main ledger view.
 
 ### Columns
 
-| Column | Description |
-|--------|-------------|
-| Date | Transaction date |
-| Type | Check / Deposit / Expense |
-| Ref No | Reference ID |
-| Payee / Account | Counterparty |
-| Memo | Description |
-| Payment | Money out |
-| Deposit | Money in |
-| Balance | Running balance |
+Header row 1:
+
+- Date
+- Ref No
+- Payee
+- Memo
+- Payment
+- Deposit
+- Balance
+
+Header row 2:
+
+- Type (under Ref No)
+- Account (under Payee)
+
+Header alignment:
+
+- all header labels are top-aligned
 
 ---
 
@@ -211,14 +219,43 @@ Visual states:
 Click primary action button:
 
 - uses selected transaction type
-- creates transaction via TransactionService
-- posts via Ledger Engine
-- appends row in register
+- opens inline draft row in first table position
 
 When selecting from chevron menu:
 
 - selected type is updated
-- transaction row is auto-created immediately
+- inline draft row is shown for data entry
+
+Inline draft row fields and layout:
+
+- Date column: date input
+- Ref/Type column: `Ref No` input and disabled `Type` input
+- Payee/Account column: payee input + account type input (text for now)
+- Memo column: memo input
+- Payment column: payment amount input
+- Deposit column: deposit amount input
+- Balance column: live balance preview + `Cancel` and `Save` buttons
+
+Validation rules for draft row:
+
+- date is required
+- payee is required
+- account type text is required
+- only one of payment/deposit can be populated
+- at least one of payment/deposit is required
+- inflow transaction types must use deposit
+- outflow transaction types must use payment
+
+Save behavior:
+
+- valid draft creates transaction via TransactionService
+- transaction is posted through Ledger Engine
+- draft row is removed and persisted row appears in register
+- save action is single-submit (button is disabled while saving)
+
+Cancel behavior:
+
+- removes draft row without creating transaction
 
 ---
 
