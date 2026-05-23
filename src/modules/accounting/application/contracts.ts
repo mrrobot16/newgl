@@ -1,0 +1,51 @@
+import type {
+  Account,
+  AccountHierarchy,
+  CreateAccountInput,
+  CreateTransactionInput,
+  LedgerPosting,
+  RegisterEntry,
+  Transaction,
+  UpdateAccountInput
+} from "@/modules/accounting/domain/models";
+
+export interface AccountService {
+  createAccount(input: CreateAccountInput): Promise<Account>;
+  updateAccount(id: string, input: UpdateAccountInput): Promise<Account>;
+  closeAccount(id: string): Promise<void>;
+  getAccountById(id: string): Promise<Account>;
+  listAccounts(): Promise<Account[]>;
+  getAccountHierarchy(): Promise<AccountHierarchy>;
+}
+
+export interface TransactionService {
+  createTransaction(input: CreateTransactionInput): Promise<Transaction>;
+  getTransactionById(id: string): Promise<Transaction>;
+  listTransactions(): Promise<Transaction[]>;
+  postTransaction(id: string): Promise<Transaction>;
+  voidTransaction(id: string): Promise<Transaction>;
+  reverseTransaction(id: string): Promise<Transaction>;
+  createDeposit(input: Omit<CreateTransactionInput, "type">): Promise<Transaction>;
+  createTransfer(input: Omit<CreateTransactionInput, "type">): Promise<Transaction>;
+}
+
+export interface LedgerService {
+  getPostingsByTransactionId(transactionId: string): Promise<LedgerPosting[]>;
+  listPostings(): Promise<LedgerPosting[]>;
+}
+
+export interface RegisterService {
+  listRegisterEntries(accountId: string): Promise<RegisterEntry[]>;
+  getTransactionDetail(transactionId: string): Promise<{
+    transaction: Transaction;
+    postings: LedgerPosting[];
+    registerEntries: RegisterEntry[];
+  }>;
+}
+
+export type ServiceContainer = {
+  accountService: AccountService;
+  transactionService: TransactionService;
+  ledgerService: LedgerService;
+  registerService: RegisterService;
+};
