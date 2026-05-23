@@ -7,18 +7,18 @@ import type {
   Account,
   LedgerPosting,
   RegisterEntry,
-  Transaction,
-  TransactionType
+  Transaction
 } from "@/modules/accounting/domain/models";
-
-type TransactionAction = "CHECK" | "DEPOSIT" | "EXPENSE" | "TRANSFER" | "JOURNAL_ENTRY";
-
-function mapActionToTransactionType(action: TransactionAction): TransactionType {
-  if (action === "CHECK") {
-    return "EXPENSE";
-  }
-  return action;
-}
+import {
+  getSupportedTransactionTypesForAccount,
+  isInflowTransactionType,
+  isOutflowTransactionType,
+  toDomainTransactionType
+} from "@/modules/accounting/presentation/transaction-type-policy";
+import type {
+  BankRegisterTransactionTypeId,
+  BankRegisterTransactionTypeOption
+} from "@/modules/accounting/presentation/transaction-type-policy";
 
 function findCounterpartyAccount(
   accounts: Account[],
@@ -37,10 +37,20 @@ export function useBankRegister() {
   const services = useMemo(() => getServiceContainer(), []);
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [selectedAccountId, setSelectedAccountId] = useState<string>("");
+  const [selectedTransactionType, setSelectedTransactionType] =
+    useState<BankRegisterTransactionTypeId>("CHECK");
   const [entries, setEntries] = useState<RegisterEntry[]>([]);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [selectedPostings, setSelectedPostings] = useState<LedgerPosting[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const selectedAccount = useMemo(
+    () => accounts.find((account) => account.id === selectedAccountId),
+    [accounts, selectedAccountId]
+  );
+  const availableTransactionTypes = useMemo<BankRegisterTransactionTypeOption[]>(
+    () => getSupportedTransactionTypesForAccount(selectedAccount),
+    [selectedAccount]
+  );
   const generalBalance = useMemo(
     () => accounts.reduce((sum, account) => sum + account.currentBalance, 0),
     [accounts]
@@ -83,6 +93,15 @@ export function useBankRegister() {
     return unsubscribe;
   }, [refreshAccounts, refreshEntries]);
 
+  useEffect(() => {
+    const selectedSupported = availableTransactionTypes.some(
+      (transactionType) => transactionType.id === selectedTransactionType
+    );
+    if (!selectedSupported && availableTransactionTypes.length > 0) {
+      setSelectedTransactionType(availableTransactionTypes[0].id);
+    }
+  }, [availableTransactionTypes, selectedTransactionType]);
+
   const selectTransaction = useCallback(
     async (transactionId: string) => {
       try {
@@ -98,44 +117,23 @@ export function useBankRegister() {
   );
 
   const addTransaction = useCallback(
-    async (action: TransactionAction) => {
+    async (transactionTypeId: BankRegisterTransactionTypeId) => {
       if (!selectedAccountId) {
         setError("Select an account first.");
         return;
       }
 
-      const amountRaw = window.prompt(`${action} amount`, "100");
-      if (!amountRaw) {
-        return;
-      }
-      const amount = Number(amountRaw);
-      if (!Number.isFinite(amount) || amount <= 0) {
-        setError("Amount must be greater than 0.");
-        return;
-      }
-      const payee = window.prompt("Payee / Counterparty", "Vendor");
-      const memo = window.prompt("Memo", `${action} from toolbar`);
+      const amount = 100;
+      const selectedTypeLabel =
+        availableTransactionTypes.find((option) => option.id === transactionTypeId)?.label ??
+        transactionTypeId.replaceAll("_", " ");
+      const payee = `${selectedTypeLabel} Counterparty`;
+      const memo = `Auto ${selectedTypeLabel}`;
       const referenceNumber = `TX-${Math.floor(Math.random() * 100000)}`;
+      const domainTransactionType = toDomainTransactionType(transactionTypeId);
 
       try {
-        if (action === "DEPOSIT") {
-          const incomeAccount =
-            findCounterpartyAccount(accounts, selectedAccountId, [
-              "Personal income",
-              "Owners investment",
-              "Retained Earnings"
-            ]) ?? accounts[0];
-          await services.transactionService.createDeposit({
-            transactionDate: new Date().toISOString().slice(0, 10),
-            referenceNumber,
-            memo: memo ?? undefined,
-            payee: payee ?? undefined,
-            postings: [
-              { accountId: selectedAccountId, type: "DEBIT", amount },
-              { accountId: incomeAccount.id, type: "CREDIT", amount }
-            ]
-          });
-        } else if (action === "TRANSFER") {
+        if (transactionTypeId === "TRANSFER") {
           const destination = accounts.find((account) => account.id !== selectedAccountId);
           if (!destination) {
             setError("Need at least two accounts for transfers.");
@@ -144,13 +142,45 @@ export function useBankRegister() {
           await services.transactionService.createTransfer({
             transactionDate: new Date().toISOString().slice(0, 10),
             referenceNumber,
-            memo: memo ?? undefined,
-            payee: payee ?? undefined,
+            memo,
+            payee,
             postings: [
               { accountId: destination.id, type: "DEBIT", amount },
               { accountId: selectedAccountId, type: "CREDIT", amount }
             ]
           });
+        } else if (isInflowTransactionType(transactionTypeId)) {
+          const incomeAccount =
+            findCounterpartyAccount(accounts, selectedAccountId, [
+              "Personal income",
+              "Owners investment",
+              "Retained Earnings"
+            ]) ?? accounts[0];
+          if (domainTransactionType === "DEPOSIT") {
+            await services.transactionService.createDeposit({
+              transactionDate: new Date().toISOString().slice(0, 10),
+              referenceNumber,
+              memo,
+              payee,
+              postings: [
+                { accountId: selectedAccountId, type: "DEBIT", amount },
+                { accountId: incomeAccount.id, type: "CREDIT", amount }
+              ]
+            });
+          } else {
+            const transaction = await services.transactionService.createTransaction({
+              type: domainTransactionType,
+              transactionDate: new Date().toISOString().slice(0, 10),
+              referenceNumber,
+              memo,
+              payee,
+              postings: [
+                { accountId: selectedAccountId, type: "DEBIT", amount },
+                { accountId: incomeAccount.id, type: "CREDIT", amount }
+              ]
+            });
+            await services.transactionService.postTransaction(transaction.id);
+          }
         } else {
           const expenseOrOffset =
             findCounterpartyAccount(accounts, selectedAccountId, [
@@ -158,15 +188,17 @@ export function useBankRegister() {
               "Charitable donations",
               "Retained Earnings"
             ]) ?? accounts[0];
+          const selectedPostingType = isOutflowTransactionType(transactionTypeId) ? "CREDIT" : "DEBIT";
+          const offsetPostingType = selectedPostingType === "CREDIT" ? "DEBIT" : "CREDIT";
           const transaction = await services.transactionService.createTransaction({
-            type: mapActionToTransactionType(action),
+            type: domainTransactionType,
             transactionDate: new Date().toISOString().slice(0, 10),
             referenceNumber,
-            memo: memo ?? undefined,
-            payee: payee ?? undefined,
+            memo,
+            payee,
             postings: [
-              { accountId: expenseOrOffset.id, type: "DEBIT", amount },
-              { accountId: selectedAccountId, type: "CREDIT", amount }
+              { accountId: expenseOrOffset.id, type: offsetPostingType, amount },
+              { accountId: selectedAccountId, type: selectedPostingType, amount }
             ]
           });
           await services.transactionService.postTransaction(transaction.id);
@@ -176,7 +208,19 @@ export function useBankRegister() {
         setError(value instanceof Error ? value.message : "Failed to create transaction.");
       }
     },
-    [accounts, selectedAccountId, services.transactionService]
+    [accounts, availableTransactionTypes, selectedAccountId, services.transactionService]
+  );
+
+  const addSelectedTransaction = useCallback(async () => {
+    await addTransaction(selectedTransactionType);
+  }, [addTransaction, selectedTransactionType]);
+
+  const selectTransactionType = useCallback(
+    async (transactionTypeId: BankRegisterTransactionTypeId) => {
+      setSelectedTransactionType(transactionTypeId);
+      await addTransaction(transactionTypeId);
+    },
+    [addTransaction]
   );
 
   const voidTransaction = useCallback(
@@ -210,13 +254,17 @@ export function useBankRegister() {
   return {
     accounts,
     entries,
+    availableTransactionTypes,
     generalBalance,
     selectedAccountId,
+    selectedAccount,
     selectedTransaction,
+    selectedTransactionType,
     selectedPostings,
     error,
     setSelectedAccountId,
-    addTransaction,
+    addSelectedTransaction,
+    selectTransactionType,
     selectTransaction,
     voidTransaction,
     reverseTransaction

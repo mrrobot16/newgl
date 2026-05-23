@@ -51,3 +51,81 @@ function BankRegisterPage() {
     </BankRegisterProvider>
   );
 }
+```
+
+---
+
+## 2. Account Selector Layer
+
+### AccountSelector
+
+Responsibilities:
+
+- render account options as `Name (Category)`
+- drive selected account state
+- trigger action toolbar type recalculation
+
+---
+
+## 3. Action Toolbar Layer
+
+### ActionToolbar (Split Button)
+
+Responsibilities:
+
+- render primary button `Add <Selected Type>`
+- render chevron dropdown with transaction type list
+- update selected transaction type from dropdown
+- create transaction on primary click
+- create transaction immediately when selecting a type in dropdown
+- consume account transaction type resolver (`getSupportedTransactionTypesForAccount(account)`)
+
+For `Cash on hand (Bank)` the dropdown list must include:
+
+- Check
+- Deposit
+- Sales Receipt
+- Receive Payment
+- Bill Payment
+- Refund
+- Expense
+- Transfer
+- Journal Entry
+
+For `Credit Card Payable (Credit Card)` the dropdown list must include:
+
+- CC Expense
+- Expense
+- CC Credit
+- Bill Payment
+- Transfer
+- Journal Entry
+
+For `Charitable donations (Equity)` the dropdown list must include:
+
+- Transfer
+- Journal Entry
+
+---
+
+## 4. Register Table Layer
+
+### RegisterTable
+
+Responsibilities:
+
+- render ledger-oriented rows
+- support row click for detail panel
+- reflect auto-inserted rows from toolbar actions
+
+---
+
+## 5. Detail Panel Layer
+
+### DetailPanel
+
+Responsibilities:
+
+- display selected transaction details
+- show postings and audit-friendly data
+- expose reverse/void actions

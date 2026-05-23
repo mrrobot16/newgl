@@ -138,6 +138,39 @@ RunningBalance = PreviousBalance + Deposits - Payments
 Users can select one active account at a time.
 
 The register table updates dynamically based on the selected account.
+Available transaction types in the action toolbar vary by selected account category.
+Resolution must be account-driven:
+
+- input: selected account
+- output: list of supported transaction type options for that account
+- account-level rules can override category defaults
+- every bootstrap account should have an explicit entry in the account-name resolver map
+
+For `Cash on hand (Bank)` the available types are:
+
+- Check
+- Deposit
+- Sales Receipt
+- Receive Payment
+- Bill Payment
+- Refund
+- Expense
+- Transfer
+- Journal Entry
+
+For `Credit Card Payable (Credit Card)` the available types are:
+
+- CC Expense
+- Expense
+- CC Credit
+- Bill Payment
+- Transfer
+- Journal Entry
+
+For `Charitable donations (Equity)` the available types are:
+
+- Transfer
+- Journal Entry
 
 Default account catalog for bootstrap:
 

@@ -1,30 +1,93 @@
+"use client";
+
+import { useEffect, useMemo, useRef, useState } from "react";
+import type {
+  BankRegisterTransactionTypeId,
+  BankRegisterTransactionTypeOption
+} from "@/modules/accounting/presentation/transaction-type-policy";
+
 type ActionToolbarProps = {
-  onAction: (action: "CHECK" | "DEPOSIT" | "EXPENSE" | "TRANSFER" | "JOURNAL_ENTRY") => void;
+  availableTransactionTypes: BankRegisterTransactionTypeOption[];
+  selectedTransactionType: BankRegisterTransactionTypeId;
+  onAddSelectedTransaction: () => void;
+  onSelectTransactionType: (transactionType: BankRegisterTransactionTypeId) => void;
 };
 
-const ACTIONS: ActionToolbarProps["onAction"] extends (action: infer T) => void
-  ? Array<{ label: string; value: T }>
-  : never = [
-  { label: "+ Check", value: "CHECK" },
-  { label: "+ Deposit", value: "DEPOSIT" },
-  { label: "+ Expense", value: "EXPENSE" },
-  { label: "+ Transfer", value: "TRANSFER" },
-  { label: "+ Journal Entry", value: "JOURNAL_ENTRY" }
-];
+export function ActionToolbar({
+  availableTransactionTypes,
+  selectedTransactionType,
+  onAddSelectedTransaction,
+  onSelectTransactionType
+}: ActionToolbarProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
 
-export function ActionToolbar({ onAction }: ActionToolbarProps) {
+  useEffect(() => {
+    function handleOutsideClick(event: MouseEvent) {
+      if (!wrapperRef.current) {
+        return;
+      }
+      if (!wrapperRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+
+    window.addEventListener("mousedown", handleOutsideClick);
+    return () => window.removeEventListener("mousedown", handleOutsideClick);
+  }, []);
+
+  const selectedLabel = useMemo(
+    () =>
+      `Add ${
+        availableTransactionTypes.find((transactionType) => transactionType.id === selectedTransactionType)
+          ?.label ?? selectedTransactionType
+      }`,
+    [availableTransactionTypes, selectedTransactionType]
+  );
+
   return (
-    <div className="flex flex-wrap gap-2 rounded-lg border border-slate-200 bg-white p-4">
-      {ACTIONS.map((action) => (
+    <div className="rounded-lg border border-slate-200 bg-white p-4">
+      <div className="relative inline-flex" ref={wrapperRef}>
         <button
-          key={action.value}
           type="button"
-          onClick={() => onAction(action.value)}
-          className="rounded-md border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+          onClick={onAddSelectedTransaction}
+          className="rounded-l-md border border-slate-300 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
         >
-          {action.label}
+          {selectedLabel}
         </button>
-      ))}
+        <button
+          type="button"
+          aria-label="Open transaction type list"
+          onClick={() => setIsOpen((open) => !open)}
+          className="rounded-r-md border border-l-0 border-slate-300 bg-white px-3 py-2 text-slate-700 hover:bg-slate-100"
+        >
+          <svg viewBox="0 0 20 20" className="h-4 w-4" fill="currentColor" aria-hidden="true">
+            <path d="M5.25 7.5 10 12.25 14.75 7.5" />
+          </svg>
+        </button>
+
+        {isOpen ? (
+          <div className="absolute top-11 z-10 w-64 rounded-md border border-slate-200 bg-white p-1 shadow-lg">
+            {availableTransactionTypes.map((transactionType) => (
+              <button
+                key={transactionType.id}
+                type="button"
+                onClick={() => {
+                  setIsOpen(false);
+                  onSelectTransactionType(transactionType.id);
+                }}
+                className={`block w-full rounded px-3 py-2 text-left text-sm ${
+                  transactionType.id === selectedTransactionType
+                    ? "bg-slate-100 font-medium text-slate-900"
+                    : "text-slate-700 hover:bg-slate-50"
+                }`}
+              >
+                {transactionType.label}
+              </button>
+            ))}
+          </div>
+        ) : null}
+      </div>
     </div>
   );
 }

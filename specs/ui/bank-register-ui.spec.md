@@ -92,15 +92,50 @@ Supported default options:
 
 ## 3. Action Toolbar
 
-Buttons:
+The toolbar uses a split action control:
 
-- + Check
-- + Deposit
-- + Expense
-- + Transfer
-- + Journal Entry
+- Primary button: `Add <Selected Transaction Type>`
+- Secondary button: chevron down to open transaction type menu
 
-Each button opens a transaction modal.
+Behavior:
+
+- Clicking the primary button creates a transaction using the last selected type
+- Clicking chevron opens the available transaction types for the selected account
+- Selecting a type in the menu:
+  - updates the primary button label
+  - immediately creates a new row with auto-filled transaction data
+
+Transaction type availability is account-driven:
+
+- UI calls a resolver with selected account
+- resolver returns supported transaction types for that account
+- each type provides both ID and label for rendering/behavior
+
+For `Cash on hand (Bank)`, available types must be:
+
+- Check
+- Deposit
+- Sales Receipt
+- Receive Payment
+- Bill Payment
+- Refund
+- Expense
+- Transfer
+- Journal Entry
+
+For `Credit Card Payable (Credit Card)`, available types must be:
+
+- CC Expense
+- Expense
+- CC Credit
+- Bill Payment
+- Transfer
+- Journal Entry
+
+For `Charitable donations (Equity)`, available types must be:
+
+- Transfer
+- Journal Entry
 
 ---
 
@@ -173,11 +208,17 @@ Visual states:
 
 ## Add Transaction
 
-Click action button:
+Click primary action button:
 
-- opens modal
-- uses TransactionService
+- uses selected transaction type
+- creates transaction via TransactionService
 - posts via Ledger Engine
+- appends row in register
+
+When selecting from chevron menu:
+
+- selected type is updated
+- transaction row is auto-created immediately
 
 ---
 

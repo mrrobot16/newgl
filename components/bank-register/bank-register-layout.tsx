@@ -9,14 +9,18 @@ import { useBankRegister } from "@/modules/accounting/presentation/hooks/use-ban
 export function BankRegisterLayout() {
   const {
     accounts,
+    availableTransactionTypes,
     entries,
     generalBalance,
     selectedAccountId,
+    selectedAccount,
     selectedTransaction,
+    selectedTransactionType,
     selectedPostings,
     error,
     setSelectedAccountId,
-    addTransaction,
+    addSelectedTransaction,
+    selectTransactionType,
     selectTransaction,
     voidTransaction,
     reverseTransaction
@@ -46,7 +50,17 @@ export function BankRegisterLayout() {
           selectedAccountId={selectedAccountId}
           onChange={setSelectedAccountId}
         />
-        <ActionToolbar onAction={addTransaction} />
+        <ActionToolbar
+          availableTransactionTypes={availableTransactionTypes}
+          selectedTransactionType={selectedTransactionType}
+          onAddSelectedTransaction={addSelectedTransaction}
+          onSelectTransactionType={selectTransactionType}
+        />
+        {selectedAccount ? (
+          <p className="text-xs text-slate-500">
+            Transaction types for {selectedAccount.name} ({selectedAccount.category.toLowerCase().replaceAll("_", " ")}).
+          </p>
+        ) : null}
         {error ? <div className="rounded-md bg-red-50 p-3 text-sm text-red-700">{error}</div> : null}
       </div>
 
