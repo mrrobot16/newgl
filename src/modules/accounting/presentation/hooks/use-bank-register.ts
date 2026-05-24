@@ -36,6 +36,15 @@ export type DraftTransactionErrors = Partial<
   Record<"date" | "payee" | "accountTypeLabel" | "payment" | "deposit" | "amount" | "form", string>
 >;
 
+export type InlineEntryEditorInput = {
+  date: string;
+  refNo: string;
+  payee: string;
+  memo: string;
+  payment: string;
+  deposit: string;
+};
+
 function findCounterpartyAccount(
   accounts: Account[],
   selectedAccountId: string,
@@ -79,15 +88,6 @@ export function useBankRegister() {
     }
     return 0;
   }, [entries, selectedAccount]);
-  const draftBalancePreview = useMemo(() => {
-    if (!draftTransaction || !selectedAccount) {
-      return null;
-    }
-    const latestRunningBalance = entries.length > 0 ? entries[0].runningBalance : selectedAccount.openingBalance ?? 0;
-    const payment = Number(draftTransaction.payment || 0);
-    const deposit = Number(draftTransaction.deposit || 0);
-    return latestRunningBalance + deposit - payment;
-  }, [draftTransaction, entries, selectedAccount]);
 
   const refreshAccounts = useCallback(async () => {
     const accountList = await services.accountService.listAccounts();
@@ -381,6 +381,33 @@ export function useBankRegister() {
     [services.transactionService]
   );
 
+  const updateRegisterEntryInline = useCallback(
+    async (entryId: string, input: InlineEntryEditorInput) => {
+      const payment = Number(input.payment || 0);
+      const deposit = Number(input.deposit || 0);
+      await services.registerService.updateRegisterEntry(entryId, {
+        date: input.date,
+        refNumber: input.refNo || undefined,
+        payee: input.payee || undefined,
+        memo: input.memo || undefined,
+        payment: payment > 0 ? payment : undefined,
+        deposit: deposit > 0 ? deposit : undefined
+      });
+      await refreshEntries();
+      await refreshAccounts();
+    },
+    [refreshAccounts, refreshEntries, services.registerService]
+  );
+
+  const deleteRegisterEntryInline = useCallback(
+    async (entryId: string) => {
+      await services.registerService.deleteRegisterEntry(entryId);
+      await refreshEntries();
+      await refreshAccounts();
+    },
+    [refreshAccounts, refreshEntries, services.registerService]
+  );
+
   return {
     accounts,
     entries,
@@ -391,7 +418,6 @@ export function useBankRegister() {
     selectedTransaction,
     selectedTransactionType,
     selectedPostings,
-    draftBalancePreview,
     draftErrors,
     draftTransaction,
     error,
@@ -399,6 +425,8 @@ export function useBankRegister() {
     setSelectedAccountId,
     addSelectedTransaction,
     cancelDraftTransaction,
+    deleteRegisterEntryInline,
+    updateRegisterEntryInline,
     selectTransactionType,
     saveDraftTransaction,
     selectTransaction,

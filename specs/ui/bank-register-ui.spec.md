@@ -23,7 +23,7 @@ The Bank Register allows users to:
 
 # Layout Structure
 
-The screen is divided into 5 main sections:
+The screen is divided into 4 main sections:
 
 ## 1. General Balance Overview (Top Summary)
 
@@ -166,17 +166,6 @@ Header alignment:
 
 ---
 
-## 5. Detail Panel (Optional Side Panel)
-
-Shows:
-
-- full transaction details
-- ledger postings
-- audit history
-- actions (void, reverse, edit draft)
-
----
-
 # Table Behavior
 
 ## Sorting
@@ -234,7 +223,8 @@ Inline draft row fields and layout:
 - Memo column: memo input
 - Payment column: payment amount input
 - Deposit column: deposit amount input
-- Balance column: live balance preview + `Cancel` and `Save` buttons
+- Balance column: hidden placeholder (no balance preview during edit)
+- Action buttons appear in a separate row below the draft form (`Cancel`, `Save`)
 
 Validation rules for draft row:
 
@@ -245,6 +235,8 @@ Validation rules for draft row:
 - at least one of payment/deposit is required
 - inflow transaction types must use deposit
 - outflow transaction types must use payment
+- payment input is disabled for inflow transaction types
+- deposit input is disabled for outflow transaction types
 
 Save behavior:
 
@@ -261,11 +253,29 @@ Cancel behavior:
 
 ## Row Click
 
-Opens detail panel:
+Activates inline row editor in the clicked row position.
 
-- shows ledger postings
-- shows events history
-- shows audit trail
+Inline row actions:
+
+- Delete
+- Edit
+- Cancel
+- Save
+
+Row editing behavior:
+
+- row opens with inline inputs ready for editing
+- editable fields are: Date, Payee, Memo, Payment, Deposit
+- Ref No and Account remain read-only in this version
+- Edit button is reserved for future behavior (no-op in current version)
+- payment/deposit input availability is constrained by transaction type
+- Save persists row changes
+- Delete removes row from the table
+- after delete, running balances are recalculated from remaining rows
+- top register balance updates to match remaining table state
+- Cancel closes row editor without persisting
+- row action buttons (`Delete`, `Edit`, `Cancel`, `Save`) render in a separate row below the inline form
+- balance is not shown while editing an existing row
 
 ---
 

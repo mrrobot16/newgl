@@ -117,21 +117,16 @@ Responsibilities:
 - render ledger-oriented rows
 - render two-level column headers (`Ref No/Type` and `Payee/Account`)
 - render header labels top-aligned
-- support row click for detail panel
+- support row click for inline row editor
 - render inline draft row at top when action is initiated
 - handle inline draft field editing by column
-- expose `Save` and `Cancel` actions for draft row
-- show field validation messages and balance preview before save
+- expose `Save` and `Cancel` actions for draft row in a separate action row below the form
+- show field validation messages before save (no balance preview while editing)
 - lock draft save action while request is in-flight
+- render existing-row actions: `Delete`, `Edit`, `Cancel`, `Save` in a separate row below inline row form
+- persist row updates/deletes through RegisterService
+- on delete, remove row from list and trigger running balance recomputation
+- allow immediate inline editing for Date, Payee, Memo, Payment, and Deposit
+- keep `Edit` button visible as reserved no-op for future behavior
 
 ---
-
-## 5. Detail Panel Layer
-
-### DetailPanel
-
-Responsibilities:
-
-- display selected transaction details
-- show postings and audit-friendly data
-- expose reverse/void actions

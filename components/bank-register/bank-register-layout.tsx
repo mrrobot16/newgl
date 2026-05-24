@@ -2,7 +2,6 @@
 
 import { AccountSelector } from "@/components/bank-register/account-selector";
 import { ActionToolbar } from "@/components/bank-register/action-toolbar";
-import { DetailPanel } from "@/components/bank-register/detail-panel";
 import { RegisterTable } from "@/components/bank-register/register-table";
 import { useBankRegister } from "@/modules/accounting/presentation/hooks/use-bank-register";
 
@@ -14,10 +13,7 @@ export function BankRegisterLayout() {
     generalBalance,
     selectedAccountId,
     selectedAccount,
-    selectedTransaction,
     selectedTransactionType,
-    selectedPostings,
-    draftBalancePreview,
     draftErrors,
     draftTransaction,
     error,
@@ -25,12 +21,11 @@ export function BankRegisterLayout() {
     setSelectedAccountId,
     addSelectedTransaction,
     cancelDraftTransaction,
+    deleteRegisterEntryInline,
     selectTransactionType,
     saveDraftTransaction,
-    selectTransaction,
+    updateRegisterEntryInline,
     updateDraftField,
-    voidTransaction,
-    reverseTransaction
   } = useBankRegister();
 
   return (
@@ -71,23 +66,17 @@ export function BankRegisterLayout() {
         {error ? <div className="rounded-md bg-red-50 p-3 text-sm text-red-700">{error}</div> : null}
       </div>
 
-      <section className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+      <section className="mt-6">
         <RegisterTable
           entries={entries}
-          onSelect={selectTransaction}
           draftTransaction={draftTransaction}
           draftErrors={draftErrors}
-          draftBalancePreview={draftBalancePreview}
           isSavingDraft={isSavingDraft}
           onDraftFieldChange={updateDraftField}
           onDraftSave={saveDraftTransaction}
           onDraftCancel={cancelDraftTransaction}
-        />
-        <DetailPanel
-          transaction={selectedTransaction}
-          postings={selectedPostings}
-          onVoid={voidTransaction}
-          onReverse={reverseTransaction}
+          onUpdateEntry={updateRegisterEntryInline}
+          onDeleteEntry={deleteRegisterEntryInline}
         />
       </section>
     </main>

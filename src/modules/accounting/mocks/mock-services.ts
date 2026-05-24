@@ -548,6 +548,107 @@ export class MockRegisterService implements RegisterService {
       registerEntries: this.store.registerEntries.filter((entry) => entry.transactionId === transactionId)
     };
   }
+
+  async updateRegisterEntry(
+    entryId: string,
+    input: Pick<RegisterEntry, "date" | "refNumber" | "payee" | "memo"> & {
+      payment?: number;
+      deposit?: number;
+    }
+  ): Promise<RegisterEntry> {
+    const entry = this.store.registerEntries.find((item) => item.id === entryId);
+    if (!entry) {
+      throw new Error(`Register entry ${entryId} not found`);
+    }
+    if ((input.payment ?? 0) > 0 && (input.deposit ?? 0) > 0) {
+      throw new Error("Register entry cannot contain both payment and deposit.");
+    }
+
+    entry.date = input.date;
+    entry.refNumber = input.refNumber;
+    entry.payee = input.payee;
+    entry.memo = input.memo;
+    entry.payment = input.payment && input.payment > 0 ? input.payment : undefined;
+    entry.deposit = input.deposit && input.deposit > 0 ? input.deposit : undefined;
+
+    const transaction = this.store.transactions.find((item) => item.id === entry.transactionId);
+    if (transaction) {
+      transaction.transactionDate = input.date;
+      transaction.referenceNumber = input.refNumber;
+      transaction.payee = input.payee;
+      transaction.memo = input.memo;
+      transaction.updatedAt = nowIso();
+    }
+
+    this.store.ledgerPostings
+      .filter((posting) => posting.transactionId === entry.transactionId)
+      .forEach((posting) => {
+        posting.postingDate = input.date;
+        posting.referenceNumber = input.refNumber;
+        posting.memo = input.memo;
+      });
+
+    recalculateRunningBalances(this.store, entry.accountId);
+    const accountEntries = this.store.registerEntries
+      .filter((item) => item.accountId === entry.accountId)
+      .sort((a, b) => `${b.date}-${b.createdAt}`.localeCompare(`${a.date}-${a.createdAt}`));
+    const account = requireAccount(this.store, entry.accountId);
+    account.currentBalance = accountEntries[0]?.runningBalance ?? account.openingBalance ?? 0;
+    account.updatedAt = nowIso();
+    emit({
+      eventType: "AccountBalanceUpdated",
+      accountId: account.id,
+      currentBalance: account.currentBalance,
+      updatedAt: account.updatedAt
+    });
+
+    return entry;
+  }
+
+  async deleteRegisterEntry(entryId: string): Promise<RegisterEntry> {
+    const entryIndex = this.store.registerEntries.findIndex((item) => item.id === entryId);
+    if (entryIndex === -1) {
+      throw new Error(`Register entry ${entryId} not found`);
+    }
+    const entry = this.store.registerEntries[entryIndex];
+    const accountId = entry.accountId;
+
+    // Remove row from the register table data source.
+    this.store.registerEntries.splice(entryIndex, 1);
+
+    // Rebuild running balances from remaining rows.
+    recalculateRunningBalances(this.store, accountId);
+
+    // Keep selected account balance in sync with the remaining rows.
+    const account = requireAccount(this.store, accountId);
+    const accountEntries = this.store.registerEntries
+      .filter((item) => item.accountId === accountId)
+      .sort((a, b) => `${b.date}-${b.createdAt}`.localeCompare(`${a.date}-${a.createdAt}`));
+    account.currentBalance = accountEntries[0]?.runningBalance ?? account.openingBalance ?? 0;
+    account.updatedAt = nowIso();
+
+    const chart = this.store.chartAccounts.find((item) => item.id === accountId);
+    if (chart) {
+      chart.currentBalance = account.currentBalance;
+      chart.availableBalance = account.currentBalance;
+      chart.updatedAt = account.updatedAt;
+    }
+
+    emit({
+      eventType: "AccountBalanceUpdated",
+      accountId,
+      currentBalance: account.currentBalance,
+      updatedAt: account.updatedAt
+    });
+
+    const transaction = this.store.transactions.find((item) => item.id === entry.transactionId);
+    if (transaction) {
+      transaction.status = "DELETED";
+      transaction.updatedAt = nowIso();
+    }
+
+    return entry;
+  }
 }
 
 export function createMockAccountingServices() {

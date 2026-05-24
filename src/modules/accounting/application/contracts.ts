@@ -41,6 +41,14 @@ export interface RegisterService {
     postings: LedgerPosting[];
     registerEntries: RegisterEntry[];
   }>;
+  updateRegisterEntry(
+    entryId: string,
+    input: Pick<RegisterEntry, "date" | "refNumber" | "payee" | "memo"> & {
+      payment?: number;
+      deposit?: number;
+    }
+  ): Promise<RegisterEntry>;
+  deleteRegisterEntry(entryId: string): Promise<RegisterEntry>;
 }
 
 export type ServiceContainer = {
