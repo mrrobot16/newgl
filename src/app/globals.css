@@ -2,7 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --app-font-family: "Avenir Next forINTUIT", "Avenir Next", Avenir, Helvetica, Arial, sans-serif;
+}
+
 body {
   background: #f5f7fb;
   color: #111827;
+  font-family: var(--app-font-family);
 }

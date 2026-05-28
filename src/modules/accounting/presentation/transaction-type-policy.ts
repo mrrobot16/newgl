@@ -190,6 +190,17 @@ export function isOutflowTransactionType(transactionTypeId: BankRegisterTransact
   );
 }
 
+export function isAccountFieldDisabledForTransactionType(
+  transactionTypeId: BankRegisterTransactionTypeId
+): boolean {
+  return (
+    transactionTypeId === "SALES_RECEIPT" ||
+    transactionTypeId === "RECEIVE_PAYMENT" ||
+    transactionTypeId === "BILL_PAYMENT" ||
+    transactionTypeId === "REFUND"
+  );
+}
+
 export function toDomainTransactionType(
   transactionTypeId: BankRegisterTransactionTypeId
 ): TransactionType {

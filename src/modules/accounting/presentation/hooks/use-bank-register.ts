@@ -10,6 +10,7 @@ import type {
   Transaction
 } from "@/modules/accounting/domain/models";
 import {
+  isAccountFieldDisabledForTransactionType,
   getSupportedTransactionTypesForAccount,
   isInflowTransactionType,
   isOutflowTransactionType,
@@ -202,15 +203,15 @@ export function useBankRegister() {
     const payment = Number(draftTransaction.payment || 0);
     const deposit = Number(draftTransaction.deposit || 0);
     const amount = deposit > 0 ? deposit : payment;
+    const isAccountFieldDisabled = isAccountFieldDisabledForTransactionType(
+      draftTransaction.transactionTypeId
+    );
     const errors: DraftTransactionErrors = {};
 
     if (!draftTransaction.date) {
       errors.date = "Date is required.";
     }
-    if (!draftTransaction.payee.trim()) {
-      errors.payee = "Payee is required.";
-    }
-    if (!draftTransaction.accountTypeLabel.trim()) {
+    if (!isAccountFieldDisabled && !draftTransaction.accountTypeLabel.trim()) {
       errors.accountTypeLabel = "Account type text is required.";
     }
     if (payment > 0 && deposit > 0) {
@@ -258,7 +259,7 @@ export function useBankRegister() {
           transactionDate: draftTransaction.date,
           referenceNumber,
           memo: draftTransaction.memo.trim() || undefined,
-          payee: draftTransaction.payee.trim(),
+            payee: draftTransaction.payee.trim() || undefined,
           postings: selectedIsDestination
             ? [
                 { accountId: selectedAccountId, type: "DEBIT", amount },
@@ -284,7 +285,7 @@ export function useBankRegister() {
             transactionDate: draftTransaction.date,
             referenceNumber,
             memo: draftTransaction.memo.trim() || undefined,
-            payee: draftTransaction.payee.trim(),
+            payee: draftTransaction.payee.trim() || undefined,
             postings: [
               { accountId: selectedAccountId, type: "DEBIT", amount },
               { accountId: incomeAccount.id, type: "CREDIT", amount }
@@ -296,7 +297,7 @@ export function useBankRegister() {
             transactionDate: draftTransaction.date,
             referenceNumber,
             memo: draftTransaction.memo.trim() || undefined,
-            payee: draftTransaction.payee.trim(),
+            payee: draftTransaction.payee.trim() || undefined,
             postings: [
               { accountId: selectedAccountId, type: "DEBIT", amount },
               { accountId: incomeAccount.id, type: "CREDIT", amount }
@@ -320,7 +321,7 @@ export function useBankRegister() {
           transactionDate: draftTransaction.date,
           referenceNumber,
           memo: draftTransaction.memo.trim() || undefined,
-          payee: draftTransaction.payee.trim(),
+          payee: draftTransaction.payee.trim() || undefined,
           postings: [
             { accountId: expenseOrOffset.id, type: offsetPostingType, amount },
             { accountId: selectedAccountId, type: selectedPostingType, amount }

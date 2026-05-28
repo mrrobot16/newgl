@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import "./globals.css";
+import "../styles/tailwind-overrides.css";
 
 export const metadata: Metadata = {
   title: "Quickslike Bank Register",

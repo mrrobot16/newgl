@@ -25,6 +25,36 @@ The Bank Register allows users to:
 
 The screen is divided into 4 main sections:
 
+## Visual Style (QuickBooks-like)
+
+- white, minimal layout with consistent `text-sm` baseline
+- primary text colors use gray scale (`gray-800` / `gray-900`)
+- app-wide font stack should prefer `Avenir Next forINTUIT`, then `Avenir Next`, `Avenir`, `Helvetica`, `Arial`, `sans-serif`
+- top header includes:
+  - back link (`Back to Chart of Accounts`) with left arrow, blue hoverable text
+  - `Bank Register` title with semibold emphasis
+  - account selector in compact bordered control with right chevron
+  - right-side `Reconcile` green action button
+  - ending balance label (`uppercase`, `tracking-wide`) with prominent amount
+- pagination/navigation strip includes `Go to` input, first/prev/next/last actions, and range summary
+- action toolbar uses blue text split control (`Add <Type>`) with chevron dropdown
+- table container includes filter bar above header:
+  - left filter indicator (`All`)
+  - right-side utility actions (print/export/settings)
+- table uses:
+  - gray header background and uppercase tiny labels
+  - fixed-width numeric columns and right-aligned amounts
+  - hoverable ledger rows with subtle border separators
+- draft/edit input rows use blue-tinted background and focus-ring input styles
+- disabled fields use gray background, gray text, and non-interactive cursor
+- table area can support horizontal scrolling on small screens, but dropdown menus must never be clipped
+- selector fields follow a shared text-field style:
+  - `h-9` (36px), inherited font, `text-sm`, `leading-[1.2]`
+  - bordered white surface with small radius and transition on background/border/shadow
+  - custom chevron icon uses the shared 24x24 down-chevron SVG
+  - supports width behavior: parent `min-w-fit w-fit` keeps compact `208px`; `w-full` expands to container width
+- global CSS override file is available at `src/styles/tailwind-overrides.css` and loaded after Tailwind globals for higher-priority rules
+
 ## 1. General Balance Overview (Top Summary)
 
 - Shows a single "Balance General" amount for the currently selected account register
@@ -219,7 +249,7 @@ Inline draft row fields and layout:
 
 - Date column: date input
 - Ref/Type column: `Ref No` input and disabled `Type` input
-- Payee/Account column: payee input + account type input (text for now)
+- Payee/Account column: payee combobox + account combobox
 - Memo column: memo input
 - Payment column: payment amount input
 - Deposit column: deposit amount input
@@ -229,14 +259,90 @@ Inline draft row fields and layout:
 Validation rules for draft row:
 
 - date is required
-- payee is required
-- account type text is required
+- payee is optional
+- account selection is required only when Account select is enabled
 - only one of payment/deposit can be populated
 - at least one of payment/deposit is required
 - inflow transaction types must use deposit
 - outflow transaction types must use payment
 - payment input is disabled for inflow transaction types
 - deposit input is disabled for outflow transaction types
+- account input is disabled (grayed out) for `Sales Receipt`, `Receive Payment`, `Bill Payment`, `Refund`
+- account input is enabled for `Check`, `Deposit`, `Expense`, `Transfer`, `Journal Entry`
+
+Account select behavior:
+
+- rendered as text input with adjacent chevron toggle button (same interaction pattern as Payee)
+- input placeholder is `Account`
+- clicking input or chevron opens dropdown list
+- typing in input filters account options in real time
+- each account option row shows account name left and category right
+- selecting an account writes the account name into the input value
+- uses the predefined accounting chart options list (Bank, Credit Card, Equity, Expense, Fixed Asset, Income, Long Term Liability, Other Current Asset, Other Current Liability, Other Expense, Other Income)
+
+Payee select behavior:
+
+- rendered as text input with adjacent chevron toggle button
+- input placeholder is `Payee` when value is empty
+- clicking input or chevron opens dropdown list
+- typing in input filters payee list by name
+- selecting an existing payee writes the selected value into the input
+- dropdown shows full payee list when opened and filters only while typing
+- dropdown includes `+ Add new` option pinned at the top, opening payee side modal
+- payee and account dropdown menus render above table rows and must not be clipped by register container overflow
+
+Payee side modal behavior:
+
+- slides from right side with width `752px` and height `100vh`
+- overlay covers rest of screen and clicking overlay closes modal
+- includes type selector: `Customer`, `Vendor`, `Employee`
+- each type has grouped form cards with shadow and collapsible headers
+- card header includes left icon + group title and right chevron state
+- labels are above fields and fields have no placeholder text
+- on successful save, modal form state is reset for the next creation flow
+
+Vendor form groups:
+
+- Name and contact
+- Address
+- Notes and attachments
+- Bill pay ACH info
+- Additional info (Sales tax + Expense rates subgroups)
+
+Customer form groups:
+
+- Name and contact
+  - title, first name, middle name, last name, suffix
+  - Company name, Customer display name*
+  - email, phone number, cc, Bcc, mobile number, Fax, Other, Website
+  - Name to print on checks
+  - Is a sub-customer (checkbox)
+- Communication permissions
+  - centered helper text for customer consent once email is present
+- Address
+  - Street address 1, Street address 2, City, State, ZIP code, Country
+  - Shipping address checkbox: Same as billing address
+- Notes and attachments
+  - Notes
+  - Attachments (max 20mb)
+- Payments
+  - Primary payment method: ACH, Cash, Check, Credit Card
+  - Terms: Due on receipt, Net 15, Net 30, Net 60
+  - Sales form delivery options
+  - Language to use when sending invoices:
+    English, French, Spanish, Italian, Chinese (traditional), Portuguese (Brazil)
+- Additional info
+  - Sales tax: Exemption details
+  - Opening balance: Opening balance + As of (date)
+
+Employee form groups:
+
+- Employee details
+  - First name *
+  - M.I.
+  - Last name *
+  - Email
+  - Hire date
 
 Save behavior:
 

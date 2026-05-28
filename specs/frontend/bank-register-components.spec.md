@@ -64,6 +64,7 @@ Responsibilities:
 - render account options as `Name (Category)`
 - drive selected account state
 - trigger action toolbar type recalculation
+- render compact selector control with bordered style and chevron affordance
 
 ---
 
@@ -79,6 +80,7 @@ Responsibilities:
 - open inline draft row on primary click
 - open inline draft row when selecting a type in dropdown
 - consume account transaction type resolver (`getSupportedTransactionTypesForAccount(account)`)
+- apply QuickBooks-like blue-link visual style for split button and menu
 
 For `Cash on hand (Bank)` the dropdown list must include:
 
@@ -128,5 +130,34 @@ Responsibilities:
 - on delete, remove row from list and trigger running balance recomputation
 - allow immediate inline editing for Date, Payee, Memo, Payment, and Deposit
 - keep `Edit` button visible as reserved no-op for future behavior
+- render payee combobox-style input with chevron toggle and `+ Add new` option
+- open and wire payee side modal from payee selector
+- render account combobox-style input with chevron toggle and searchable dropdown
+- render account options with left-aligned name and right-aligned category
+- disable/enable draft `Account` select based on selected transaction type policy and gray it out when disabled
+- apply shared selector field styling (`h-9`, bordered surface, transition states, custom chevron SVG)
+- support selector width modes: compact (`min-w-fit w-fit` + `208px`) and fluid (`w-full`)
+- render filter toolbar above the table (`All`, print/export/settings)
+- support small-screen horizontal scrolling without clipping payee/account dropdown overlays
+- use QuickBooks-like table spacing, header treatments, and numeric alignment
+
+## 5. Payee Modal Layer
+
+### PayeeSelect + PayeeSideModal
+
+Responsibilities:
+
+- maintain payee options and allow selecting a payee from a filterable input + dropdown
+- provide chevron toggle to open/close payee options list
+- open dropdown with full payee list and filter list while typing
+- provide `+ Add new` entry pinned at top in payee dropdown
+- ensure payee and account dropdowns can overlay the register table without clipping
+- render side modal (`752px`, `100vh`) with overlay-close behavior
+- render type-specific forms for `Customer`, `Vendor`, and `Employee`
+- render full `Customer` form sections (name/contact, permissions, address, notes, payments, additional info)
+- render `Employee` form with fields: First name*, M.I., Last name*, Email, Hire date
+- implement collapsible form cards with header chevron and right-side icon
+- persist created payee in selector options and auto-select it in active form
+- clear payee modal form state after successful save
 
 ---

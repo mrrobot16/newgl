@@ -46,12 +46,12 @@ export function ActionToolbar({
   );
 
   return (
-    <div className="rounded-lg border border-slate-200 bg-white p-4">
+    <div className="px-4 py-2">
       <div className="relative inline-flex" ref={wrapperRef}>
         <button
           type="button"
           onClick={onAddSelectedTransaction}
-          className="rounded-l-md border border-slate-300 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+          className="flex items-center gap-1 rounded-l border border-r-0 border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-blue-600 hover:text-blue-800"
         >
           {selectedLabel}
         </button>
@@ -59,7 +59,7 @@ export function ActionToolbar({
           type="button"
           aria-label="Open transaction type list"
           onClick={() => setIsOpen((open) => !open)}
-          className="rounded-r-md border border-l-0 border-slate-300 bg-white px-3 py-2 text-slate-700 hover:bg-slate-100"
+          className="rounded-r border border-gray-200 bg-white px-2 py-1.5 text-blue-600 hover:text-blue-800"
         >
           <svg viewBox="0 0 20 20" className="h-4 w-4" fill="currentColor" aria-hidden="true">
             <path d="M5.25 7.5 10 12.25 14.75 7.5" />
@@ -67,7 +67,7 @@ export function ActionToolbar({
         </button>
 
         {isOpen ? (
-          <div className="absolute top-11 z-10 w-64 rounded-md border border-slate-200 bg-white p-1 shadow-lg">
+          <div className="absolute top-10 z-50 min-w-40 rounded border border-gray-200 bg-white py-1 shadow-md">
             {availableTransactionTypes.map((transactionType) => (
               <button
                 key={transactionType.id}
@@ -76,10 +76,10 @@ export function ActionToolbar({
                   setIsOpen(false);
                   onSelectTransactionType(transactionType.id);
                 }}
-                className={`block w-full rounded px-3 py-2 text-left text-sm ${
+                className={`block w-full px-4 py-2 text-left text-sm ${
                   transactionType.id === selectedTransactionType
-                    ? "bg-slate-100 font-medium text-slate-900"
-                    : "text-slate-700 hover:bg-slate-50"
+                    ? "bg-gray-100 font-medium text-gray-900"
+                    : "text-gray-700 hover:bg-gray-100"
                 }`}
               >
                 {transactionType.label}
