@@ -1,8 +1,8 @@
 import { Fragment, useEffect, useMemo, useState } from "react";
-import { AccountSelect } from "@/components/bank-register/account-select";
-import { PayeeSelect } from "@/components/bank-register/payee-select";
+import { ACCOUNT_FIELD_OPTIONS } from "@/components/bank-register/account-field-options";
 import { PayeeSideModal } from "@/components/bank-register/payee-side-modal";
 import type { PayeeOption } from "@/components/bank-register/payee-side-modal";
+import { SelectField } from "@/components/bank-register/select-field";
 import type { RegisterEntry } from "@/modules/accounting/domain/models";
 import {
   isAccountFieldDisabledForTransactionType,
@@ -84,6 +84,15 @@ export function RegisterTable({
   const selectedEntry = useMemo(
     () => entries.find((entry) => entry.id === selectedEntryId) ?? null,
     [entries, selectedEntryId]
+  );
+  const payeeOptions = useMemo(
+    () =>
+      payees.map((payee) => ({
+        value: payee.name,
+        label: payee.name,
+        rightLabel: payee.kind.toLowerCase()
+      })),
+    [payees]
   );
   const isDraftInflowType = draftTransaction
     ? isInflowTransactionType(draftTransaction.transactionTypeId)
@@ -248,14 +257,17 @@ export function RegisterTable({
                 />
               </td>
               <td className="px-3 py-2">
-                <PayeeSelect
+                <SelectField
                   value={draftTransaction.payee}
-                  payees={payees}
+                  options={payeeOptions}
+                  placeholder="Payee"
                   onChange={(value) => onDraftFieldChange("payee", value)}
                   onAddNew={() => openPayeeModal("draft")}
                 />
-                <AccountSelect
+                <SelectField
                   value={draftTransaction.accountTypeLabel}
+                  options={ACCOUNT_FIELD_OPTIONS}
+                  placeholder="Account"
                   onChange={(value) => onDraftFieldChange("accountTypeLabel", value)}
                   disabled={isDraftAccountFieldDisabled}
                 />
@@ -369,9 +381,10 @@ export function RegisterTable({
                     />
                   </td>
                   <td className="px-3 py-2">
-                    <PayeeSelect
+                    <SelectField
                       value={editor.payee}
-                      payees={payees}
+                      options={payeeOptions}
+                      placeholder="Payee"
                       onChange={(value) => setEditor((current) => ({ ...current, payee: value }))}
                       onAddNew={() => openPayeeModal("row")}
                     />

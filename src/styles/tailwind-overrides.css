@@ -13,6 +13,12 @@
   --override-focus: #3b82f6;
   --color-text-global: #21262a;
   --color-text-primary: #393A3D;
+  --color-input-border-primary: #8D9096;
+  --font-size-input-text: 16px;
+  --font-size-component-medium: 16px;
+  --color-action-passive-subtle-active: rgba(107, 108, 114, 0.2);
+  --color-action-passive-subtle-focus: rgba(107, 108, 114, 0);
+  --color-action-passive-subtle-hover: rgba(107, 108, 114, 0.1);
 }
 
 /*
@@ -22,6 +28,7 @@
 .tw-override .selector-field {
   height: 36px;
   padding: 0.5rem 0.75rem;
+  font-size: var(--font-size-input-text) !important;
   line-height: 1.2;
   border-radius: 0.25rem;
   border: 1px solid #d1d5db !important;
@@ -82,4 +89,34 @@
   font-size: 2.2rem;
   line-height: 2.2rem;
   font-weight: 400;
+}
+.tw-override .selector-field {
+  border: 1px solid #8d9096;
+  border-color: var(--color-input-border-primary);
+  font-size: var(--font-size-input-text);
+}
+
+.tw-override .selector-option {
+  font-size: var(--font-size-component-medium);
+}
+
+.tw-override .selector-option-selected {
+  background-color: var(--color-action-passive-subtle-active);
+  font-size: var(--font-size-component-medium);
+}
+
+.tw-override .selector-option-selected:hover {
+  background-color: var(--color-action-passive-subtle-hover);
+}
+
+.tw-override .selector-option-selected:focus-visible {
+  background-color: var(--color-action-passive-subtle-focus);
+}
+
+.tw-override .selector-option-selected:active {
+  background-color: var(--color-action-passive-subtle-active);
+}
+
+.tw-override .selector-option-selected .selector-option-label {
+  font-weight: 700;
 }

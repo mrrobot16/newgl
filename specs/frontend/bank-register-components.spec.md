@@ -65,6 +65,7 @@ Responsibilities:
 - drive selected account state
 - trigger action toolbar type recalculation
 - render compact selector control with bordered style and chevron affordance
+- use shared `SelectField` component with searchable dropdown behavior (no `+ Add new`)
 
 ---
 
@@ -130,9 +131,9 @@ Responsibilities:
 - on delete, remove row from list and trigger running balance recomputation
 - allow immediate inline editing for Date, Payee, Memo, Payment, and Deposit
 - keep `Edit` button visible as reserved no-op for future behavior
-- render payee combobox-style input with chevron toggle and `+ Add new` option
+- render payee using shared `SelectField` (with `+ Add new` enabled by prop)
 - open and wire payee side modal from payee selector
-- render account combobox-style input with chevron toggle and searchable dropdown
+- render account using shared `SelectField` (without `+ Add new`)
 - render account options with left-aligned name and right-aligned category
 - disable/enable draft `Account` select based on selected transaction type policy and gray it out when disabled
 - apply shared selector field styling (`h-9`, bordered surface, transition states, custom chevron SVG)
@@ -143,14 +144,15 @@ Responsibilities:
 
 ## 5. Payee Modal Layer
 
-### PayeeSelect + PayeeSideModal
+### SelectField + PayeeSideModal
 
 Responsibilities:
 
-- maintain payee options and allow selecting a payee from a filterable input + dropdown
-- provide chevron toggle to open/close payee options list
-- open dropdown with full payee list and filter list while typing
-- provide `+ Add new` entry pinned at top in payee dropdown
+- maintain one reusable `SelectField` for `Register bank`, `Payee`, and `Account`
+- provide chevron toggle to open/close options list
+- open dropdown with full list and filter in real time while typing
+- enable/disable `+ Add new` action via prop
+- allow parent to pass custom add action callback via prop
 - ensure payee and account dropdowns can overlay the register table without clipping
 - render side modal (`752px`, `100vh`) with overlay-close behavior
 - render type-specific forms for `Customer`, `Vendor`, and `Employee`

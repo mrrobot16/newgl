@@ -49,10 +49,19 @@ The screen is divided into 4 main sections:
 - disabled fields use gray background, gray text, and non-interactive cursor
 - table area can support horizontal scrolling on small screens, but dropdown menus must never be clipped
 - selector fields follow a shared text-field style:
+  - input text size comes from CSS variable `--font-size-input-text` (`16px`)
   - `h-9` (36px), inherited font, `text-sm`, `leading-[1.2]`
   - bordered white surface with small radius and transition on background/border/shadow
   - custom chevron icon uses the shared 24x24 down-chevron SVG
   - supports width behavior: parent `min-w-fit w-fit` keeps compact `208px`; `w-full` expands to container width
+- `Register bank`, `Payee`, and `Account` must use one shared reusable `SelectField` component
+- `SelectField` supports optional `+ Add new` action controlled by prop and callback
+- `SelectField` dropdown must support wider readable width for long option texts and be left-aligned slightly outside input edge
+- selected option in `SelectField` uses `--font-size-component-medium` and passive subtle background states:
+  - `--color-action-passive-subtle-hover`
+  - `--color-action-passive-subtle-focus`
+  - `--color-action-passive-subtle-active`
+- selected option label text (first span) is bold
 - global CSS override file is available at `src/styles/tailwind-overrides.css` and loaded after Tailwind globals for higher-priority rules
 
 ## 1. General Balance Overview (Top Summary)
