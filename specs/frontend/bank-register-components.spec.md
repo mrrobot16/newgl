@@ -75,6 +75,7 @@ Responsibilities:
 
 Responsibilities:
 
+- use shared icon components for reusable action glyphs (eg. triangle-down trigger icon)
 - render primary button `Add <Selected Type>`
 - render chevron dropdown with transaction type list
 - update selected transaction type from dropdown
@@ -119,6 +120,11 @@ Responsibilities:
 
 - pagination view uses link-based labels (`Go to`, `First`, `Previous`, `Next`, `Last`)
 - apply disabled/hover link states using CSS tokens (`--color-text-disabled`, `--color-text-highlight`)
+- compose 3 structural areas: `ActionBar`, `HeaderTable`, `ContentTable`
+- render `ActionToolbar` inside `ContentTable > actions-quickadd`
+- render draft form directly below `actions-quickadd`
+- render ledger entries as individual row tables inside `ContentTable`
+- show empty-state message `There are no transactions matching the selected criteria` when no rows exist
 - render ledger-oriented rows
 - render two-level column headers (`Ref No/Type` and `Payee/Account`)
 - render header labels top-aligned
@@ -151,6 +157,7 @@ Responsibilities:
 - render `TablePagination` outside `RegisterTable`
 - place one pagination block above and one below the table container
 - keep pagination aligned to the right
+- pass transaction-type toolbar props into `RegisterTable` for in-table quick-add rendering
 
 ## 5. Payee Modal Layer
 

@@ -1,54 +1,123 @@
 import type { Account, TransactionType } from "@/modules/accounting/domain/models";
 
+type ExtraBankRegisterTransactionTypeId =
+  | "CC_EXPENSE"
+  | "INVOICE"
+  | "BILL"
+  | "CC_CREDIT"
+  | "VENDOR_CREDIT"
+  | "CC_BILL_PAYMENT"
+  | "CASH_EXPENSE"
+  | "CREDIT_MEMO"
+  | "PAYROLL_CHECK"
+  | "TAX_PAYMENT"
+  | "PAYROLL_ADJUSTMENT"
+  | "PAYROLL_REFUND"
+  | "SALES_TAX_PAYMENT"
+  | "SALES_TAX_ADJUSTMENT"
+  | "CREDIT_CARD_PAYMENT"
+  | "EMPLOYEE_NON_REIMBURSABLE_EXPENSE"
+  | "EMPLOYEE_REIMBURSEMENT"
+  | "EMPLOYEE_REIMBURSABLE_EXPENSE";
+
 export type BankRegisterTransactionTypeId =
   | TransactionType
-  | "CC_EXPENSE"
-  | "CC_CREDIT";
+  | ExtraBankRegisterTransactionTypeId;
 
 export type BankRegisterTransactionTypeOption = {
   id: BankRegisterTransactionTypeId;
   label: string;
 };
 
-const CASH_ON_HAND_TRANSACTION_TYPES: BankRegisterTransactionTypeOption[] = [
-  { id: "CHECK", label: "Check" },
-  { id: "DEPOSIT", label: "Deposit" },
-  { id: "SALES_RECEIPT", label: "Sales Receipt" },
-  { id: "RECEIVE_PAYMENT", label: "Receive Payment" },
-  { id: "BILL_PAYMENT", label: "Bill Payment" },
-  { id: "REFUND", label: "Refund" },
-  { id: "EXPENSE", label: "Expense" },
-  { id: "TRANSFER", label: "Transfer" },
-  { id: "JOURNAL_ENTRY", label: "Journal Entry" }
-];
-
-const CREDIT_CARD_PAYABLE_TRANSACTION_TYPES: BankRegisterTransactionTypeOption[] = [
+const BANK_REGISTER_TRANSACTION_TYPE_CATALOG: BankRegisterTransactionTypeOption[] = [
   { id: "CC_EXPENSE", label: "CC Expense" },
-  { id: "EXPENSE", label: "Expense" },
-  { id: "CC_CREDIT", label: "CC Credit" },
-  { id: "BILL_PAYMENT", label: "Bill Payment" },
-  { id: "TRANSFER", label: "Transfer" },
-  { id: "JOURNAL_ENTRY", label: "Journal Entry" }
-];
-
-const CHARITABLE_DONATIONS_TRANSACTION_TYPES: BankRegisterTransactionTypeOption[] = [
-  { id: "TRANSFER", label: "Transfer" },
-  { id: "JOURNAL_ENTRY", label: "Journal Entry" }
-];
-
-const TODO_ACCOUNT_TRANSACTION_TYPES: BankRegisterTransactionTypeOption[] = [
-  { id: "TRANSFER", label: "Transfer" },
-  { id: "JOURNAL_ENTRY", label: "Journal Entry" }
-];
-
-const OTHER_CURRENT_ASSET_TRANSACTION_TYPES: BankRegisterTransactionTypeOption[] = [
-  { id: "DEPOSIT", label: "Deposit" },
-  { id: "SALES_RECEIPT", label: "Sales Receipt" },
+  { id: "CHECK", label: "Check" },
+  { id: "INVOICE", label: "Invoice" },
   { id: "RECEIVE_PAYMENT", label: "Receive Payment" },
-  { id: "REFUND", label: "Refund" },
+  { id: "JOURNAL_ENTRY", label: "Journal Entry" },
+  { id: "BILL", label: "Bill" },
+  { id: "CC_CREDIT", label: "CC Credit" },
+  { id: "VENDOR_CREDIT", label: "Vendor Credit" },
+  { id: "BILL_PAYMENT", label: "Bill Payment" },
+  { id: "CC_BILL_PAYMENT", label: "CC Bill Payment" },
   { id: "TRANSFER", label: "Transfer" },
-  { id: "JOURNAL_ENTRY", label: "Journal Entry" }
+  { id: "DEPOSIT", label: "Deposit" },
+  { id: "CASH_EXPENSE", label: "Cash Expense" },
+  { id: "SALES_RECEIPT", label: "Sales Receipt" },
+  { id: "CREDIT_MEMO", label: "Credit Memo" },
+  { id: "REFUND", label: "Refund" },
+  { id: "PAYROLL_CHECK", label: "Payroll Check" },
+  { id: "TAX_PAYMENT", label: "Tax Payment" },
+  { id: "PAYROLL_ADJUSTMENT", label: "Payroll Adjustment" },
+  { id: "PAYROLL_REFUND", label: "Payroll Refund" },
+  { id: "SALES_TAX_PAYMENT", label: "Sales Tax Payment" },
+  { id: "SALES_TAX_ADJUSTMENT", label: "Sales Tax Adjustment" },
+  { id: "EXPENSE", label: "Expense" },
+  { id: "CREDIT_CARD_PAYMENT", label: "Credit Card Payment" },
+  { id: "EMPLOYEE_NON_REIMBURSABLE_EXPENSE", label: "Employee Non-Reimbursable Expense" },
+  { id: "EMPLOYEE_REIMBURSEMENT", label: "Employee Reimbursement" },
+  { id: "EMPLOYEE_REIMBURSABLE_EXPENSE", label: "Employee Reimbursable Expense" }
 ];
+
+const TRANSACTION_TYPE_OPTION_BY_ID = new Map<BankRegisterTransactionTypeId, BankRegisterTransactionTypeOption>(
+  BANK_REGISTER_TRANSACTION_TYPE_CATALOG.map((option) => [option.id, option])
+);
+
+function pickTransactionTypes(ids: readonly BankRegisterTransactionTypeId[]): BankRegisterTransactionTypeOption[] {
+  return ids.map((id) => {
+    const option = TRANSACTION_TYPE_OPTION_BY_ID.get(id);
+    if (!option) {
+      throw new Error(`Unsupported bank register transaction type: ${id}`);
+    }
+    return option;
+  });
+}
+
+const CASH_ON_HAND_TRANSACTION_TYPE_IDS = [
+  "CHECK",
+  "DEPOSIT",
+  "SALES_RECEIPT",
+  "RECEIVE_PAYMENT",
+  "BILL_PAYMENT",
+  "REFUND",
+  "EXPENSE",
+  "TRANSFER",
+  "JOURNAL_ENTRY"
+] satisfies readonly BankRegisterTransactionTypeId[];
+
+const CREDIT_CARD_PAYABLE_TRANSACTION_TYPE_IDS = [
+  "CC_EXPENSE",
+  "EXPENSE",
+  "CC_CREDIT",
+  "BILL_PAYMENT",
+  "TRANSFER",
+  "JOURNAL_ENTRY"
+] satisfies readonly BankRegisterTransactionTypeId[];
+
+const CHARITABLE_DONATIONS_TRANSACTION_TYPE_IDS = [
+  "TRANSFER",
+  "JOURNAL_ENTRY"
+] satisfies readonly BankRegisterTransactionTypeId[];
+
+const TODO_ACCOUNT_TRANSACTION_TYPE_IDS = [
+  "TRANSFER",
+  "JOURNAL_ENTRY"
+] satisfies readonly BankRegisterTransactionTypeId[];
+
+const OTHER_CURRENT_ASSET_TRANSACTION_TYPE_IDS = [
+  "DEPOSIT",
+  "SALES_RECEIPT",
+  "RECEIVE_PAYMENT",
+  "REFUND",
+  "TRANSFER",
+  "JOURNAL_ENTRY"
+] satisfies readonly BankRegisterTransactionTypeId[];
+
+const CASH_ON_HAND_TRANSACTION_TYPES = pickTransactionTypes(CASH_ON_HAND_TRANSACTION_TYPE_IDS);
+const CREDIT_CARD_PAYABLE_TRANSACTION_TYPES = pickTransactionTypes(CREDIT_CARD_PAYABLE_TRANSACTION_TYPE_IDS);
+const CHARITABLE_DONATIONS_TRANSACTION_TYPES = pickTransactionTypes(CHARITABLE_DONATIONS_TRANSACTION_TYPE_IDS);
+const TODO_ACCOUNT_TRANSACTION_TYPES = pickTransactionTypes(TODO_ACCOUNT_TRANSACTION_TYPE_IDS);
+const OTHER_CURRENT_ASSET_TRANSACTION_TYPES = pickTransactionTypes(OTHER_CURRENT_ASSET_TRANSACTION_TYPE_IDS);
 
 const EQUITY_CLEARING_CREDIT_CARD_PAYMENT_TRANSACTION_TYPES = TODO_ACCOUNT_TRANSACTION_TYPES;
 const EQUITY_CLEARING_TRANSFER_TRANSACTION_TYPES = TODO_ACCOUNT_TRANSACTION_TYPES;
@@ -92,26 +161,11 @@ const DEFAULT_CATEGORY_TRANSACTION_TYPES: Partial<
 > = {
   BANK: CASH_ON_HAND_TRANSACTION_TYPES,
   CREDIT_CARD: CREDIT_CARD_PAYABLE_TRANSACTION_TYPES,
-  EQUITY: [
-    { id: "JOURNAL_ENTRY", label: "Journal Entry" },
-    { id: "TRANSFER", label: "Transfer" }
-  ],
-  FIXED_ASSET: [
-    { id: "JOURNAL_ENTRY", label: "Journal Entry" },
-    { id: "TRANSFER", label: "Transfer" }
-  ],
-  LONG_TERM_LIABILITY: [
-    { id: "JOURNAL_ENTRY", label: "Journal Entry" },
-    { id: "TRANSFER", label: "Transfer" }
-  ],
-  OTHER_CURRENT_ASSET: [
-    { id: "JOURNAL_ENTRY", label: "Journal Entry" },
-    { id: "TRANSFER", label: "Transfer" }
-  ],
-  OTHER_CURRENT_LIABILITY: [
-    { id: "JOURNAL_ENTRY", label: "Journal Entry" },
-    { id: "TRANSFER", label: "Transfer" }
-  ]
+  EQUITY: TODO_ACCOUNT_TRANSACTION_TYPES,
+  FIXED_ASSET: TODO_ACCOUNT_TRANSACTION_TYPES,
+  LONG_TERM_LIABILITY: TODO_ACCOUNT_TRANSACTION_TYPES,
+  OTHER_CURRENT_ASSET: TODO_ACCOUNT_TRANSACTION_TYPES,
+  OTHER_CURRENT_LIABILITY: TODO_ACCOUNT_TRANSACTION_TYPES
 };
 
 const ACCOUNT_NAME_TRANSACTION_TYPES: Record<string, BankRegisterTransactionTypeOption[]> = {
@@ -173,20 +227,36 @@ export function getSupportedTransactionTypesForAccount(
 
 export function isInflowTransactionType(transactionTypeId: BankRegisterTransactionTypeId): boolean {
   return (
+    transactionTypeId === "INVOICE" ||
     transactionTypeId === "DEPOSIT" ||
     transactionTypeId === "SALES_RECEIPT" ||
     transactionTypeId === "RECEIVE_PAYMENT" ||
-    transactionTypeId === "CC_CREDIT"
+    transactionTypeId === "CC_CREDIT" ||
+    transactionTypeId === "CREDIT_MEMO" ||
+    transactionTypeId === "PAYROLL_REFUND"
   );
 }
 
 export function isOutflowTransactionType(transactionTypeId: BankRegisterTransactionTypeId): boolean {
   return (
     transactionTypeId === "CHECK" ||
+    transactionTypeId === "BILL" ||
+    transactionTypeId === "VENDOR_CREDIT" ||
     transactionTypeId === "BILL_PAYMENT" ||
+    transactionTypeId === "CC_BILL_PAYMENT" ||
     transactionTypeId === "REFUND" ||
     transactionTypeId === "EXPENSE" ||
-    transactionTypeId === "CC_EXPENSE"
+    transactionTypeId === "CC_EXPENSE" ||
+    transactionTypeId === "CASH_EXPENSE" ||
+    transactionTypeId === "PAYROLL_CHECK" ||
+    transactionTypeId === "TAX_PAYMENT" ||
+    transactionTypeId === "PAYROLL_ADJUSTMENT" ||
+    transactionTypeId === "SALES_TAX_PAYMENT" ||
+    transactionTypeId === "SALES_TAX_ADJUSTMENT" ||
+    transactionTypeId === "CREDIT_CARD_PAYMENT" ||
+    transactionTypeId === "EMPLOYEE_NON_REIMBURSABLE_EXPENSE" ||
+    transactionTypeId === "EMPLOYEE_REIMBURSEMENT" ||
+    transactionTypeId === "EMPLOYEE_REIMBURSABLE_EXPENSE"
   );
 }
 
@@ -204,11 +274,33 @@ export function isAccountFieldDisabledForTransactionType(
 export function toDomainTransactionType(
   transactionTypeId: BankRegisterTransactionTypeId
 ): TransactionType {
-  if (transactionTypeId === "CC_EXPENSE") {
-    return "EXPENSE";
+  switch (transactionTypeId) {
+    case "CC_EXPENSE":
+    case "CASH_EXPENSE":
+    case "EMPLOYEE_NON_REIMBURSABLE_EXPENSE":
+    case "EMPLOYEE_REIMBURSEMENT":
+    case "EMPLOYEE_REIMBURSABLE_EXPENSE":
+      return "EXPENSE";
+    case "CC_CREDIT":
+    case "BILL":
+    case "VENDOR_CREDIT":
+    case "CC_BILL_PAYMENT":
+    case "TAX_PAYMENT":
+    case "SALES_TAX_PAYMENT":
+    case "CREDIT_CARD_PAYMENT":
+      return "BILL_PAYMENT";
+    case "INVOICE":
+      return "SALES_RECEIPT";
+    case "CREDIT_MEMO":
+      return "REFUND";
+    case "PAYROLL_CHECK":
+      return "CHECK";
+    case "PAYROLL_ADJUSTMENT":
+    case "SALES_TAX_ADJUSTMENT":
+      return "JOURNAL_ENTRY";
+    case "PAYROLL_REFUND":
+      return "DEPOSIT";
+    default:
+      return transactionTypeId;
   }
-  if (transactionTypeId === "CC_CREDIT") {
-    return "BILL_PAYMENT";
-  }
-  return transactionTypeId;
 }

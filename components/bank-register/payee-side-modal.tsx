@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
+import { Button } from "@/components/ui/button";
 
 export type PayeeKind = "CUSTOMER" | "VENDOR" | "EMPLOYEE";
 
@@ -526,15 +527,11 @@ export function PayeeSideModal({ open, onClose, onSave }: PayeeSideModalProps) {
         {error ? <p className="mt-3 text-xs text-red-600">{error}</p> : null}
 
         <footer className="mt-6 flex justify-end gap-2">
-          <button
-            type="button"
-            onClick={handleClose}
-            className="rounded border border-slate-300 px-3 py-2 text-sm text-slate-700"
-          >
+          <Button variant="secondary" onClick={handleClose}>
             Cancel
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
+            variant="primary"
             onClick={() => {
               if (!resolvedName) {
                 setError("Display name is required.");
@@ -548,10 +545,9 @@ export function PayeeSideModal({ open, onClose, onSave }: PayeeSideModalProps) {
               resetForms();
               onClose();
             }}
-            className="rounded border border-emerald-600 bg-emerald-600 px-3 py-2 text-sm font-medium text-white"
           >
             Save payee
-          </button>
+          </Button>
         </footer>
       </aside>
     </div>
