@@ -52,6 +52,14 @@ function rowStyle(status: RegisterEntry["status"]): string {
   return "text-gray-800";
 }
 
+function formatTransactionTypeLabel(transactionType: RegisterEntry["transactionType"]): string {
+  return transactionType
+    .toLowerCase()
+    .split("_")
+    .map((segment) => (segment ? segment[0].toUpperCase() + segment.slice(1) : segment))
+    .join(" ");
+}
+
 const INFLOW_ROW_TYPES = new Set<RegisterEntry["transactionType"]>([
   "DEPOSIT",
   "SALES_RECEIPT",
@@ -230,22 +238,22 @@ export function RegisterTable({
               {entry.date}
             </td>
             <td className="border-l border-l-dotted border-l-[var(--color-divider-tertiary)] p-2 text-[13px] align-top">
-              {entry.refNumber ?? "-"}
+              {entry.refNumber ?? ""}
             </td>
             <td className="border-l border-l-dotted border-l-[var(--color-divider-tertiary)] p-2 text-[13px] align-top">
-              {entry.payee ?? "-"}
+              {entry.payee ?? ""}
             </td>
             <td className="border-l border-l-dotted border-l-[var(--color-divider-tertiary)] p-2 text-[13px] align-top text-gray-800">
-              {entry.memo ?? "-"}
+              {entry.memo ?? ""}
             </td>
             <td className="border-l border-l-dotted border-l-[var(--color-divider-tertiary)] p-2 text-[13px] text-right align-top text-gray-800">
-              {entry.payment ? entry.payment.toFixed(2) : "-"}
+              {entry.payment ? entry.payment.toFixed(2) : ""}
             </td>
             <td className="border-l border-l-dotted border-l-[var(--color-divider-tertiary)] p-2 text-[13px] text-right align-top text-gray-800">
-              {entry.deposit ? entry.deposit.toFixed(2) : "-"}
+              {entry.deposit ? entry.deposit.toFixed(2) : ""}
             </td>
             <td className="border-l border-l-dotted border-l-[var(--color-divider-tertiary)] p-2 text-[13px] text-center align-top text-gray-400">
-              -
+              
             </td>
             <td className="p-2 text-[13px] text-right align-top font-medium text-gray-900">
               {entry.runningBalance.toFixed(2)}
@@ -259,10 +267,10 @@ export function RegisterTable({
               &nbsp;
             </td>
             <td className="border-l border-l-dotted border-l-[var(--color-divider-tertiary)] p-2 text-[13px] align-top text-gray-500">
-              {entry.transactionType}
+              {formatTransactionTypeLabel(entry.transactionType)}
             </td>
             <td className="border-l border-l-dotted border-l-[var(--color-divider-tertiary)] p-2 text-[13px] align-top text-gray-500">
-              {entry.accountLabel ?? "-"}
+              {entry.accountLabel ?? ""}
             </td>
             <td className="border-l border-l-dotted border-l-[var(--color-divider-tertiary)] p-2 text-[13px] align-top text-gray-500">
               &nbsp;

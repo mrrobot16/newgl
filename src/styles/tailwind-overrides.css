@@ -20,6 +20,7 @@
   --font-weight-component-bold: 600;
   --color-text-primary: #393A3D;
   --radius-x-small: 2px;
+  --radius-x-large: 12px;
   --color-text-disabled: #8D9096;
   --color-text-highlight: #A0CFFF;
   --color-action-passive-subtle-active: rgba(107, 108, 114, 0.2);
@@ -114,7 +115,7 @@
 .tw-override.main {
   background-color: #ECEEF1;
   color: var(--color-text-global);
-  height: 100vh;
+  height: 100%;
   background-color: var(--color-container-background-primary);
 }
 
