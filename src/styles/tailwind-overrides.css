@@ -39,6 +39,15 @@
   --color-container-border-primary: #8D9096;
   --color-icon-secondary: #6B6C72;
   --color-action-standard-subtle-hover: rgba(0, 137, 46, 0.1);
+  --duration-fade-moderate: 200ms;
+  --ease-fade: cubic-bezier(0.35, 0, 0.5, 1);
+  --duration-fade-fast: 150ms;
+  --gbsg-nav-bar-icon-color: #21262a;
+  --gbsg-nav-bar-text-color: #21262a;
+  --gbsg-nav-bar-action-color-hover: #005244;
+  --gbsg-nav-bar-icon-color-inverse: #ffffff;
+  --font-weight-body-semibold: 500;
+  --radius-large: 8px;
 }
 
 /*
@@ -308,4 +317,27 @@
 .tw-override .button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.side-nav .side-nav-icon-shell {
+  transition: color var(--duration-fade-moderate) var(--ease-fade),
+    background-color var(--duration-fade-moderate) var(--ease-fade);
+  color: var(--gbsg-nav-bar-icon-color);
+  transition-duration: var(--duration-fade-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-large);
+}
+
+.side-nav .group:hover .side-nav-icon-shell {
+  background-color: var(--gbsg-nav-bar-action-color-hover);
+  color: var(--gbsg-nav-bar-icon-color-inverse);
+}
+
+.side-nav .side-nav-icon-shell-active {
+  background-color: var(--gbsg-nav-bar-action-color-hover);
+  color: var(--gbsg-nav-bar-icon-color-inverse);
 }
