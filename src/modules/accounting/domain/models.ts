@@ -99,6 +99,8 @@ export const transactionSchema = z.object({
   referenceNumber: z.string().optional(),
   memo: z.string().optional(),
   payee: z.string().optional(),
+  accountLabel: z.string().optional(),
+  sourceAccountId: z.string().uuid().optional(),
   postings: z.array(transactionPostingInputSchema).min(2),
   createdBy: z.string().optional(),
   createdAt: z.string().datetime().optional(),
@@ -149,6 +151,7 @@ export const registerEntrySchema = z.object({
   transactionType: transactionTypeSchema,
   refNumber: z.string().optional(),
   payee: z.string().optional(),
+  accountLabel: z.string().optional(),
   memo: z.string().optional(),
   payment: z.number().min(0).optional(),
   deposit: z.number().min(0).optional(),
@@ -187,5 +190,5 @@ export type UpdateAccountInput = Partial<
 
 export type CreateTransactionInput = Pick<
   Transaction,
-  "type" | "transactionDate" | "referenceNumber" | "memo" | "payee" | "postings"
+  "type" | "transactionDate" | "referenceNumber" | "memo" | "payee" | "accountLabel" | "sourceAccountId" | "postings"
 >;

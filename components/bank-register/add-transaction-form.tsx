@@ -1,0 +1,142 @@
+import type { ReactNode } from "react";
+import { ACCOUNT_FIELD_OPTIONS } from "@/components/bank-register/account-field-options";
+import { SelectField } from "@/components/bank-register/select-field";
+import type { SelectFieldOption } from "@/components/bank-register/select-field";
+import { Button } from "@/components/ui/button";
+import type {
+  DraftTransactionErrors,
+  DraftTransactionForm
+} from "@/modules/accounting/presentation/hooks/use-bank-register";
+
+type AddTransactionFormProps = {
+  draftTransaction: DraftTransactionForm;
+  draftErrors: DraftTransactionErrors;
+  payeeOptions: SelectFieldOption[];
+  isDraftAccountFieldDisabled: boolean;
+  isDraftInflowType: boolean;
+  isDraftOutflowType: boolean;
+  isSavingDraft: boolean;
+  renderColumnGroup: () => ReactNode;
+  onDraftFieldChange: (
+    field: keyof Omit<DraftTransactionForm, "transactionTypeId" | "transactionTypeLabel">,
+    value: string
+  ) => void;
+  onDraftSave: () => void;
+  onDraftCancel: () => void;
+  onOpenPayeeModal: () => void;
+};
+
+export function AddTransactionForm({
+  draftTransaction,
+  draftErrors,
+  payeeOptions,
+  isDraftAccountFieldDisabled,
+  isDraftInflowType,
+  isDraftOutflowType,
+  isSavingDraft,
+  renderColumnGroup,
+  onDraftFieldChange,
+  onDraftSave,
+  onDraftCancel,
+  onOpenPayeeModal
+}: AddTransactionFormProps) {
+  return (
+    <div className="form-transaction-row">
+      <div className="form-transaction-row-top">
+        <table className="w-full min-w-[1025px] table-fixed border-collapse text-sm">
+          {renderColumnGroup()}
+          <tbody>
+            <tr className="align-top">
+              <td className="form-control">
+                <input
+                  type="date"
+                  value={draftTransaction.date}
+                  onChange={(event) => onDraftFieldChange("date", event.target.value)}
+                  className="input-field w-full placeholder:text-gray-400"
+                />
+                {draftErrors.date ? <p className="mt-1 text-xs text-red-600">{draftErrors.date}</p> : null}
+              </td>
+              <td className="form-control">
+                <input
+                  type="text"
+                  value={draftTransaction.refNo}
+                  onChange={(event) => onDraftFieldChange("refNo", event.target.value)}
+                  placeholder="Ref No"
+                  className="input-field w-full placeholder:text-gray-400"
+                />
+                <input type="text" value={draftTransaction.transactionTypeLabel} disabled className="input-field mt-1 w-full" />
+              </td>
+              <td className="form-control">
+                <SelectField
+                  value={draftTransaction.payee}
+                  options={payeeOptions}
+                  placeholder="Payee"
+                  onChange={(value) => onDraftFieldChange("payee", value)}
+                  onAddNew={onOpenPayeeModal}
+                />
+                <SelectField
+                  value={draftTransaction.accountTypeLabel}
+                  options={ACCOUNT_FIELD_OPTIONS}
+                  placeholder="Account"
+                  onChange={(value) => onDraftFieldChange("accountTypeLabel", value)}
+                  disabled={isDraftAccountFieldDisabled}
+                />
+                {draftErrors.payee ? <p className="mt-1 text-xs text-red-600">{draftErrors.payee}</p> : null}
+                {draftErrors.accountTypeLabel ? <p className="mt-1 text-xs text-red-600">{draftErrors.accountTypeLabel}</p> : null}
+              </td>
+              <td className="form-control">
+                <input
+                  type="text"
+                  value={draftTransaction.memo}
+                  onChange={(event) => onDraftFieldChange("memo", event.target.value)}
+                  placeholder="Memo"
+                  className="input-field w-full placeholder:text-gray-400"
+                />
+              </td>
+              <td className="form-control">
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={draftTransaction.payment}
+                  disabled={isDraftInflowType}
+                  onChange={(event) => onDraftFieldChange("payment", event.target.value)}
+                  placeholder="0.00"
+                  className="input-field w-full text-right placeholder:text-gray-400"
+                />
+                {draftErrors.payment ? <p className="mt-1 text-xs text-red-600">{draftErrors.payment}</p> : null}
+              </td>
+              <td className="form-control">
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={draftTransaction.deposit}
+                  disabled={isDraftOutflowType}
+                  onChange={(event) => onDraftFieldChange("deposit", event.target.value)}
+                  placeholder="0.00"
+                  className="input-field w-full text-right placeholder:text-gray-400"
+                />
+                {draftErrors.deposit ? <p className="mt-1 text-xs text-red-600">{draftErrors.deposit}</p> : null}
+              </td>
+              <td className="form-control text-center text-gray-400" />
+              <td className="form-control">
+                <div className="rounded border border-gray-200 bg-gray-100 px-2 py-1 text-right text-xs text-gray-500">-</div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div className="form-transaction-row-bottom flex justify-end gap-2">
+        <Button variant="secondary" onClick={onDraftCancel} disabled={isSavingDraft}>
+          Cancel
+        </Button>
+        <Button variant="primary" onClick={onDraftSave} disabled={isSavingDraft}>
+          {isSavingDraft ? "Saving..." : "Save"}
+        </Button>
+      </div>
+      {draftErrors.amount ? <p className="mb-1 text-xs text-red-600">{draftErrors.amount}</p> : null}
+      {draftErrors.form ? <p className="mb-1 text-xs text-red-600">{draftErrors.form}</p> : null}
+    </div>
+  );
+}

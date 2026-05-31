@@ -1,19 +1,27 @@
-import { Fragment, useEffect, useMemo, useState } from "react";
-import { ACCOUNT_FIELD_OPTIONS } from "@/components/bank-register/account-field-options";
+import { useEffect, useMemo, useState } from "react";
+import { AddTransactionForm } from "@/components/bank-register/add-transaction-form";
+import { ActionToolbar } from "@/components/bank-register/action-toolbar";
+import { EditTransactionForm } from "@/components/bank-register/edit-transaction-form";
 import { PayeeSideModal } from "@/components/bank-register/payee-side-modal";
 import type { PayeeOption } from "@/components/bank-register/payee-side-modal";
-import { SelectField } from "@/components/bank-register/select-field";
+import { Button } from "@/components/ui/button";
+import { ChevronDown, Funnel, Printer, Settings2, Upload } from "lucide-react";
 import type { RegisterEntry } from "@/modules/accounting/domain/models";
+import type {
+  DraftTransactionErrors,
+  DraftTransactionForm,
+  InlineEntryEditorInput
+} from "@/modules/accounting/presentation/hooks/use-bank-register";
 import {
   isAccountFieldDisabledForTransactionType,
   isInflowTransactionType,
   isOutflowTransactionType
 } from "@/modules/accounting/presentation/transaction-type-policy";
 import type {
-  DraftTransactionErrors,
-  DraftTransactionForm,
-  InlineEntryEditorInput
-} from "@/modules/accounting/presentation/hooks/use-bank-register";
+  BankRegisterTransactionTypeId,
+  BankRegisterTransactionTypeOption
+} from "@/modules/accounting/presentation/transaction-type-policy";
+import { TriangleArrowDownIcon } from "../icons/triangle-arrow-down-icon";
 
 type RegisterTableProps = {
   entries: RegisterEntry[];
@@ -28,6 +36,10 @@ type RegisterTableProps = {
   onDraftCancel: () => void;
   onUpdateEntry: (entryId: string, input: InlineEntryEditorInput) => Promise<void>;
   onDeleteEntry: (entryId: string) => Promise<void>;
+  availableTransactionTypes: BankRegisterTransactionTypeOption[];
+  selectedTransactionType: BankRegisterTransactionTypeId;
+  onAddSelectedTransaction: () => void;
+  onSelectTransactionType: (transactionType: BankRegisterTransactionTypeId) => void;
 };
 
 function rowStyle(status: RegisterEntry["status"]): string {
@@ -62,7 +74,11 @@ export function RegisterTable({
   onDraftSave,
   onDraftCancel,
   onUpdateEntry,
-  onDeleteEntry
+  onDeleteEntry,
+  availableTransactionTypes,
+  selectedTransactionType,
+  onAddSelectedTransaction,
+  onSelectTransactionType
 }: RegisterTableProps) {
   const [selectedEntryId, setSelectedEntryId] = useState<string | null>(null);
   const [isSavingRow, setIsSavingRow] = useState(false);
@@ -84,6 +100,18 @@ export function RegisterTable({
   const selectedEntry = useMemo(
     () => entries.find((entry) => entry.id === selectedEntryId) ?? null,
     [entries, selectedEntryId]
+  );
+  const selectedEntryIndex = useMemo(
+    () => (selectedEntryId ? entries.findIndex((entry) => entry.id === selectedEntryId) : -1),
+    [entries, selectedEntryId]
+  );
+  const entriesBeforeSelected = useMemo(
+    () => (selectedEntryIndex >= 0 ? entries.slice(0, selectedEntryIndex) : entries),
+    [entries, selectedEntryIndex]
+  );
+  const entriesAfterSelected = useMemo(
+    () => (selectedEntryIndex >= 0 ? entries.slice(selectedEntryIndex + 1) : []),
+    [entries, selectedEntryIndex]
   );
   const payeeOptions = useMemo(
     () =>
@@ -133,7 +161,7 @@ export function RegisterTable({
       payment: entry.payment ? String(entry.payment) : "",
       deposit: entry.deposit ? String(entry.deposit) : ""
     });
-    setAccountLabel("");
+    setAccountLabel(entry.accountLabel ?? "");
   }
 
   function openPayeeModal(target: "draft" | "row") {
@@ -179,337 +207,254 @@ export function RegisterTable({
     }
   }
 
+  const renderColumnGroup = () => (
+    <colgroup>
+      <col className="w-[125px]" />
+      <col className="w-[100px]" />
+      <col className="w-[250px]" />
+      <col className="w-[150px]" />
+      <col className="w-[120px]" />
+      <col className="w-[120px]" />
+      <col className="w-[60px]" />
+      <col className="w-[120px]" />
+    </colgroup>
+  );
+
+  const renderReadOnlyEntryTable = (entry: RegisterEntry) => (
+    <div key={entry.id}>
+      <table className="group w-full min-w-[1025px] table-fixed border-collapse text-sm">
+        {renderColumnGroup()}
+        <tbody>
+          <tr className={`cursor-pointer group-hover:bg-[#f3f8fe] ${rowStyle(entry.status)}`} onClick={() => openRowEditor(entry)}>
+            <td className="p-2 text-[13px] align-top text-gray-800">
+              {entry.date}
+            </td>
+            <td className="border-l border-l-dotted border-l-[var(--color-divider-tertiary)] p-2 text-[13px] align-top">
+              {entry.refNumber ?? "-"}
+            </td>
+            <td className="border-l border-l-dotted border-l-[var(--color-divider-tertiary)] p-2 text-[13px] align-top">
+              {entry.payee ?? "-"}
+            </td>
+            <td className="border-l border-l-dotted border-l-[var(--color-divider-tertiary)] p-2 text-[13px] align-top text-gray-800">
+              {entry.memo ?? "-"}
+            </td>
+            <td className="border-l border-l-dotted border-l-[var(--color-divider-tertiary)] p-2 text-[13px] text-right align-top text-gray-800">
+              {entry.payment ? entry.payment.toFixed(2) : "-"}
+            </td>
+            <td className="border-l border-l-dotted border-l-[var(--color-divider-tertiary)] p-2 text-[13px] text-right align-top text-gray-800">
+              {entry.deposit ? entry.deposit.toFixed(2) : "-"}
+            </td>
+            <td className="border-l border-l-dotted border-l-[var(--color-divider-tertiary)] p-2 text-[13px] text-center align-top text-gray-400">
+              -
+            </td>
+            <td className="p-2 text-[13px] text-right align-top font-medium text-gray-900">
+              {entry.runningBalance.toFixed(2)}
+            </td>
+          </tr>
+          <tr
+            className={`cursor-pointer border-b border-gray-100 bg-[#f9fafb] group-hover:bg-[#ebf0f7] ${rowStyle(entry.status)}`}
+            onClick={() => openRowEditor(entry)}
+          >
+            <td className="p-2 text-[13px] align-top text-gray-500">
+              &nbsp;
+            </td>
+            <td className="border-l border-l-dotted border-l-[var(--color-divider-tertiary)] p-2 text-[13px] align-top text-gray-500">
+              {entry.transactionType}
+            </td>
+            <td className="border-l border-l-dotted border-l-[var(--color-divider-tertiary)] p-2 text-[13px] align-top text-gray-500">
+              {entry.accountLabel ?? "-"}
+            </td>
+            <td className="border-l border-l-dotted border-l-[var(--color-divider-tertiary)] p-2 text-[13px] align-top text-gray-500">
+              &nbsp;
+            </td>
+            <td className="border-l border-l-dotted border-l-[var(--color-divider-tertiary)] p-2 text-[13px] text-right align-top text-gray-500">
+              &nbsp;
+            </td>
+            <td className="border-l border-l-dotted border-l-[var(--color-divider-tertiary)] p-2 text-[13px] text-right align-top text-gray-500">
+              &nbsp;
+            </td>
+            <td className="border-l border-l-dotted border-l-[var(--color-divider-tertiary)] p-2 text-[13px] text-center align-top text-gray-500">
+              &nbsp;
+            </td>
+            <td className="p-2 text-[13px] text-right align-top text-gray-500">&nbsp;</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  );
+
   return (
-    <div className="relative overflow-visible rounded border border-gray-200 bg-white">
-      <div className="flex items-center justify-between border-b border-gray-200 px-4 py-2">
-        <div className="flex items-center gap-1 text-sm text-gray-600">
-          <span aria-hidden="true">⎚</span>
+    <div className="register-table relative overflow-visible bg-white">
+      <div className="action-bar flex h-[45px] items-center justify-between border-b border-gray-200 px-4">
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            className="flex h-full items-center gap-1 text-sm text-[#BABEC5] hover:text-[var(--color-icon-secondary)]"
+            aria-label="Filter register rows"
+          >
+            <Funnel className="h-[18px] w-[18px]" aria-hidden="true" />
+            <TriangleArrowDownIcon className="h-[18px] w-[18px] text-[var(--color-icon-primary)]" />
+          </button>
           <span>All</span>
-          <span aria-hidden="true">▾</span>
         </div>
-        <div className="flex items-center gap-3 text-sm text-gray-400">
-          <button type="button" className="hover:text-gray-600" aria-label="Print">
-            🖨
+        <div className="flex h-full items-center gap-4 text-[#BABEC5]">
+          <button
+            type="button"
+            className="flex h-full items-center hover:text-[var(--color-icon-secondary)]"
+            aria-label="Print"
+          >
+            <Printer className="h-[18px] w-[18px]" aria-hidden="true" />
           </button>
-          <button type="button" className="hover:text-gray-600" aria-label="Export">
-            ⭳
+          <button
+            type="button"
+            className="flex h-full items-center hover:text-[var(--color-icon-secondary)]"
+            aria-label="Export"
+          >
+            <Upload className="h-[18px] w-[18px]" aria-hidden="true" />
           </button>
-          <button type="button" className="hover:text-gray-600" aria-label="Settings">
-            ⚙
+          <button
+            type="button"
+            className="flex h-full items-center hover:text-[var(--color-icon-secondary)]"
+            aria-label="Settings"
+          >
+            <Settings2 className="h-[18px] w-[18px]" aria-hidden="true" />
           </button>
         </div>
       </div>
-      <table className="w-full min-w-[1120px] border-collapse text-sm">
-        <thead className="border-y border-gray-200 bg-gray-100 text-left text-xs uppercase tracking-wide text-gray-500">
-          <tr>
-            <th rowSpan={2} className="w-28 px-3 py-2 text-left font-semibold align-top">
-              Date
-            </th>
-            <th className="w-24 px-3 py-2 text-left font-semibold">Ref No.</th>
-            <th className="px-3 py-2 text-left font-semibold">Payee</th>
-            <th rowSpan={2} className="w-40 px-3 py-2 text-left font-semibold align-top">
-              Memo
-            </th>
-            <th rowSpan={2} className="w-28 px-3 py-2 text-right font-semibold align-top">
-              Payment
-            </th>
-            <th rowSpan={2} className="w-28 px-3 py-2 text-right font-semibold align-top">
-              Deposit
-            </th>
-            <th rowSpan={2} className="w-8 px-3 py-2 text-center font-semibold align-top">
-              ✓
-            </th>
-            <th rowSpan={2} className="w-28 px-3 py-2 text-right font-semibold align-top">
-              Balance
-            </th>
-          </tr>
-          <tr>
-            <th className="px-3 pb-2 pt-0 normal-case text-xs tracking-normal text-gray-500">Type</th>
-            <th className="px-3 pb-2 pt-0 normal-case text-xs tracking-normal text-gray-500">Account</th>
-          </tr>
-        </thead>
-        <tbody>
-          {draftTransaction ? (
-            <>
-              <tr className="border border-blue-200 bg-blue-50 align-top">
-              <td className="px-3 py-2">
-                <input
-                  type="date"
-                  value={draftTransaction.date}
-                  onChange={(event) => onDraftFieldChange("date", event.target.value)}
-                  className="w-full rounded border border-gray-300 bg-white px-2 py-1 text-sm text-gray-800 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                />
-                {draftErrors.date ? <p className="mt-1 text-xs text-red-600">{draftErrors.date}</p> : null}
-              </td>
-              <td className="px-3 py-2">
-                <input
-                  type="text"
-                  value={draftTransaction.refNo}
-                  onChange={(event) => onDraftFieldChange("refNo", event.target.value)}
-                  placeholder="Ref No"
-                  className="w-full rounded border border-gray-300 bg-white px-2 py-1 text-sm text-gray-800 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                />
-                <input
-                  type="text"
-                  value={draftTransaction.transactionTypeLabel}
-                  disabled
-                  className="mt-1 w-full rounded border border-gray-200 bg-gray-100 px-2 py-1 text-sm text-gray-400"
-                />
-              </td>
-              <td className="px-3 py-2">
-                <SelectField
-                  value={draftTransaction.payee}
-                  options={payeeOptions}
-                  placeholder="Payee"
-                  onChange={(value) => onDraftFieldChange("payee", value)}
-                  onAddNew={() => openPayeeModal("draft")}
-                />
-                <SelectField
-                  value={draftTransaction.accountTypeLabel}
-                  options={ACCOUNT_FIELD_OPTIONS}
-                  placeholder="Account"
-                  onChange={(value) => onDraftFieldChange("accountTypeLabel", value)}
-                  disabled={isDraftAccountFieldDisabled}
-                />
-                {draftErrors.payee ? <p className="mt-1 text-xs text-red-600">{draftErrors.payee}</p> : null}
-                {draftErrors.accountTypeLabel ? (
-                  <p className="mt-1 text-xs text-red-600">{draftErrors.accountTypeLabel}</p>
-                ) : null}
-              </td>
-              <td className="px-3 py-2">
-                <input
-                  type="text"
-                  value={draftTransaction.memo}
-                  onChange={(event) => onDraftFieldChange("memo", event.target.value)}
-                  placeholder="Memo"
-                  className="w-full rounded border border-gray-300 bg-white px-2 py-1 text-sm text-gray-800 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                />
-              </td>
-              <td className="px-3 py-2">
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={draftTransaction.payment}
-                  disabled={isDraftInflowType}
-                  onChange={(event) => onDraftFieldChange("payment", event.target.value)}
-                  placeholder="0.00"
-                  className="w-full rounded border border-gray-300 bg-white px-2 py-1 text-right text-sm text-gray-800 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:cursor-not-allowed disabled:border-gray-200 disabled:bg-gray-100 disabled:text-gray-400"
-                />
-                {draftErrors.payment ? <p className="mt-1 text-xs text-red-600">{draftErrors.payment}</p> : null}
-              </td>
-              <td className="px-3 py-2">
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={draftTransaction.deposit}
-                  disabled={isDraftOutflowType}
-                  onChange={(event) => onDraftFieldChange("deposit", event.target.value)}
-                  placeholder="0.00"
-                  className="w-full rounded border border-gray-300 bg-white px-2 py-1 text-right text-sm text-gray-800 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:cursor-not-allowed disabled:border-gray-200 disabled:bg-gray-100 disabled:text-gray-400"
-                />
-                {draftErrors.deposit ? <p className="mt-1 text-xs text-red-600">{draftErrors.deposit}</p> : null}
-              </td>
-              <td className="px-3 py-2 text-center text-gray-400">-</td>
-              <td className="px-3 py-2">
-                <div className="rounded border border-gray-200 bg-gray-100 px-2 py-1 text-right text-xs text-gray-500">
-                  -
-                </div>
-              </td>
-            </tr>
-              <tr className="border-b border-blue-200 bg-blue-50">
-              <td colSpan={8} className="px-3 pb-3 pt-0">
-                {draftErrors.amount ? <p className="mb-1 text-xs text-red-600">{draftErrors.amount}</p> : null}
-                {draftErrors.form ? <p className="mb-1 text-xs text-red-600">{draftErrors.form}</p> : null}
-                <div className="flex justify-end gap-2">
-                  <button
-                    type="button"
-                    onClick={onDraftCancel}
-                    disabled={isSavingDraft}
-                    className="rounded border border-gray-300 px-4 py-1.5 text-sm text-gray-700 hover:bg-gray-100"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    onClick={onDraftSave}
-                    disabled={isSavingDraft}
-                    className="rounded bg-green-600 px-4 py-1.5 text-sm font-semibold text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    {isSavingDraft ? "Saving..." : "Save"}
-                  </button>
-                </div>
-              </td>
-              </tr>
-            </>
-          ) : null}
 
-          {entries.length === 0 && !draftTransaction ? (
+      <div className="header-table">
+        <table className="w-full min-w-[1025px] table-fixed border-collapse text-sm">
+          {renderColumnGroup()}
+          <thead className="text-left uppercase tracking-wide">
             <tr>
-              <td colSpan={8} className="px-4 py-6 text-center text-gray-500">
-                No register entries yet. Create a transaction from the toolbar.
-              </td>
+              <th className="px-2 pb-[5px] pt-2 text-left align-middle">
+                Date
+              </th>
+              <th className="border-l-custom px-2 pb-[5px] pt-2 text-left align-middle">
+                Ref No.
+              </th>
+              <th className="border-l-custom px-2 pb-[5px] pt-2 text-left align-middle">
+                Payee
+              </th>
+              <th className="border-l-custom px-2 pb-[5px] pt-2 text-left align-middle">
+                Memo
+              </th>
+              <th className="border-l-custom px-2 pb-[5px] pt-2 text-right align-middle">
+                Payment
+              </th>
+              <th className="border-l-custom px-2 pb-[5px] pt-2 text-right align-middle">
+                Deposit
+              </th>
+              <th className="border-l-custom px-2 pb-[5px] pt-2 text-center align-middle">
+                ✓
+              </th>
+              <th className="border-l-custom px-2 pb-[5px] pt-2 text-right align-middle">
+                Balance
+              </th>
             </tr>
-          ) : (
-            entries.map((entry) => (
-              selectedEntryId === entry.id ? (
-                <Fragment key={entry.id}>
-                  <tr className="border border-blue-200 bg-blue-50 align-top">
-                  <td className="px-3 py-2">
-                    <input
-                      type="date"
-                      value={editor.date}
-                      disabled={false}
-                      onChange={(event) => setEditor((current) => ({ ...current, date: event.target.value }))}
-                      className="w-full rounded border border-gray-300 bg-white px-2 py-1 text-sm text-gray-800 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:cursor-not-allowed disabled:border-gray-200 disabled:bg-gray-100 disabled:text-gray-400"
-                    />
-                  </td>
-                  <td className="px-3 py-2">
-                    <input
-                      type="text"
-                      value={editor.refNo}
-                      disabled
-                      onChange={(event) => setEditor((current) => ({ ...current, refNo: event.target.value }))}
-                      className="w-full rounded border border-gray-300 bg-white px-2 py-1 text-sm text-gray-800 disabled:cursor-not-allowed disabled:border-gray-200 disabled:bg-gray-100 disabled:text-gray-400"
-                    />
-                    <input
-                      type="text"
-                      value={entry.transactionType}
-                      disabled
-                      className="mt-1 w-full rounded border border-gray-200 bg-gray-100 px-2 py-1 text-sm text-gray-400"
-                    />
-                  </td>
-                  <td className="px-3 py-2">
-                    <SelectField
-                      value={editor.payee}
-                      options={payeeOptions}
-                      placeholder="Payee"
-                      onChange={(value) => setEditor((current) => ({ ...current, payee: value }))}
-                      onAddNew={() => openPayeeModal("row")}
-                    />
-                    <input
-                      type="text"
-                      value={accountLabel}
-                      disabled
-                      onChange={(event) => setAccountLabel(event.target.value)}
-                      placeholder="Account"
-                      className="mt-1 w-full rounded border border-gray-300 bg-white px-2 py-1 text-sm text-gray-800 disabled:cursor-not-allowed disabled:border-gray-200 disabled:bg-gray-100 disabled:text-gray-400"
-                    />
-                  </td>
-                  <td className="px-3 py-2">
-                    <input
-                      type="text"
-                      value={editor.memo}
-                      disabled={false}
-                      onChange={(event) => setEditor((current) => ({ ...current, memo: event.target.value }))}
-                      className="w-full rounded border border-gray-300 bg-white px-2 py-1 text-sm text-gray-800 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:cursor-not-allowed disabled:border-gray-200 disabled:bg-gray-100 disabled:text-gray-400"
-                    />
-                  </td>
-                  <td className="px-3 py-2">
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      value={editor.payment}
-                      disabled={selectedEntry ? INFLOW_ROW_TYPES.has(selectedEntry.transactionType) : false}
-                      onChange={(event) => setEditor((current) => ({ ...current, payment: event.target.value }))}
-                      className="w-full rounded border border-gray-300 bg-white px-2 py-1 text-right text-sm text-gray-800 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:cursor-not-allowed disabled:border-gray-200 disabled:bg-gray-100 disabled:text-gray-400"
-                    />
-                  </td>
-                  <td className="px-3 py-2">
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      value={editor.deposit}
-                      disabled={selectedEntry ? OUTFLOW_ROW_TYPES.has(selectedEntry.transactionType) : false}
-                      onChange={(event) => setEditor((current) => ({ ...current, deposit: event.target.value }))}
-                      className="w-full rounded border border-gray-300 bg-white px-2 py-1 text-right text-sm text-gray-800 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:cursor-not-allowed disabled:border-gray-200 disabled:bg-gray-100 disabled:text-gray-400"
-                    />
-                  </td>
-                  <td className="px-3 py-2 text-center text-gray-400">-</td>
-                  <td className="px-3 py-2">
-                    <div className="rounded border border-gray-200 bg-gray-100 px-2 py-1 text-right text-xs text-gray-500">
-                      -
-                    </div>
-                  </td>
-                </tr>
-                  <tr className="border-b border-blue-200 bg-blue-50">
-                  <td colSpan={8} className="px-3 pb-3 pt-0">
-                    {rowError ? <p className="mb-1 text-xs text-red-600">{rowError}</p> : null}
-                    <div className="flex flex-wrap justify-end gap-2">
-                      <button
-                        type="button"
-                        disabled={isDeletingRow || isSavingRow}
-                        onClick={handleDeleteRow}
-                        className="rounded border border-red-300 px-4 py-1.5 text-sm text-red-700 hover:bg-red-50 disabled:opacity-60"
-                      >
-                        Delete
-                      </button>
-                      <button
-                        type="button"
-                        disabled={isDeletingRow || isSavingRow}
-                        onClick={() => undefined}
-                        className="rounded border border-gray-300 px-4 py-1.5 text-sm text-gray-700 hover:bg-gray-100 disabled:opacity-60"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        type="button"
-                        disabled={isDeletingRow || isSavingRow}
-                        onClick={() => {
-                          setSelectedEntryId(null);
-                          setRowError(null);
-                        }}
-                        className="rounded border border-gray-300 px-4 py-1.5 text-sm text-gray-700 hover:bg-gray-100 disabled:opacity-60"
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        type="button"
-                        disabled={isDeletingRow || isSavingRow}
-                        onClick={handleSaveRow}
-                        className="rounded bg-green-600 px-4 py-1.5 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-60"
-                      >
-                        {isSavingRow ? "Saving..." : "Save"}
-                      </button>
-                    </div>
-                  </td>
-                  </tr>
-                </Fragment>
-              ) : (
-                <tr
-                  key={entry.id}
-                  className={`cursor-pointer border-b border-gray-100 hover:bg-gray-50 ${rowStyle(entry.status)}`}
-                  onClick={() => openRowEditor(entry)}
-                >
-                  <td className="px-3 py-2 align-top text-gray-800">{entry.date}</td>
-                  <td className="px-3 py-2 align-top">
-                    <div>{entry.refNumber ?? "-"}</div>
-                    <div className="mt-0.5 text-xs text-gray-500">{entry.transactionType}</div>
-                  </td>
-                  <td className="px-3 py-2 align-top">
-                    <div>{entry.payee ?? "-"}</div>
-                    <div className="mt-0.5 text-xs text-gray-500">-</div>
-                  </td>
-                  <td className="px-3 py-2 align-top text-gray-800">{entry.memo ?? "-"}</td>
-                  <td className="px-3 py-2 text-right align-top text-gray-800">
-                    {entry.payment ? entry.payment.toFixed(2) : "-"}
-                  </td>
-                  <td className="px-3 py-2 text-right align-top text-gray-800">
-                    {entry.deposit ? entry.deposit.toFixed(2) : "-"}
-                  </td>
-                  <td className="px-3 py-2 text-center align-top text-gray-400">-</td>
-                  <td className="px-3 py-2 text-right align-top font-medium text-gray-900">
-                    {entry.runningBalance.toFixed(2)}
-                  </td>
-                </tr>
-              )
-            ))
-          )}
-        </tbody>
-      </table>
+            <tr>
+              <th className=" px-2 pb-[6px] pt-0 text-left tracking-normal">
+                &nbsp;
+              </th>
+              <th className="border-l-custom px-2 pb-[6px] pt-0 text-left tracking-normal">
+                Type
+              </th>
+              <th className="border-l-custom px-2 pb-[6px] pt-0 text-left tracking-normal">
+                Account
+              </th>
+              <th className="border-l-custom px-2 pb-[6px] pt-0 text-left tracking-normal">
+                &nbsp;
+              </th>
+              <th className="border-l-custom px-2 pb-[6px] pt-0 text-right tracking-normal">
+                &nbsp;
+              </th>
+              <th className="border-l-custom px-2 pb-[6px] pt-0 text-right tracking-normal">
+                &nbsp;
+              </th>
+              <th className="border-l-custom px-2 pb-[6px] pt-0 text-center tracking-normal">
+                &nbsp;
+              </th>
+              <th className="border-l-custom px-2 pb-[6px] pt-0 text-right tracking-normal">
+                &nbsp;
+              </th>
+            </tr>
+          </thead>
+        </table>
+      </div>
+
+      <div className="content-table">
+        <div className="actions-quickadd">
+          <ActionToolbar
+            availableTransactionTypes={availableTransactionTypes}
+            selectedTransactionType={selectedTransactionType}
+            onAddSelectedTransaction={onAddSelectedTransaction}
+            onSelectTransactionType={onSelectTransactionType}
+          />
+        </div>
+
+        {draftTransaction ? (
+          <AddTransactionForm
+            draftTransaction={draftTransaction}
+            draftErrors={draftErrors}
+            payeeOptions={payeeOptions}
+            isDraftAccountFieldDisabled={isDraftAccountFieldDisabled}
+            isDraftInflowType={isDraftInflowType}
+            isDraftOutflowType={isDraftOutflowType}
+            isSavingDraft={isSavingDraft}
+            renderColumnGroup={renderColumnGroup}
+            onDraftFieldChange={onDraftFieldChange}
+            onDraftSave={onDraftSave}
+            onDraftCancel={onDraftCancel}
+            onOpenPayeeModal={() => openPayeeModal("draft")}
+          />
+        ) : null}
+
+        {entries.length === 0 ? (
+          <div className="no-transactions-data ">There are no transactions matching the selected criteria</div>
+        ) : (
+          <>
+            {entriesBeforeSelected.map(renderReadOnlyEntryTable)}
+
+            {selectedEntry ? (
+              <div key={selectedEntry.id}>
+                <table className="w-full min-w-[1025px] table-fixed border-collapse text-sm">
+                  {renderColumnGroup()}
+                  <tbody>
+                    <tr>
+                      <td colSpan={8} className="p-0">
+                        <EditTransactionForm
+                          entry={selectedEntry}
+                          editor={editor}
+                          accountLabel={accountLabel}
+                          payeeOptions={payeeOptions}
+                          rowError={rowError}
+                          isSavingRow={isSavingRow}
+                          isDeletingRow={isDeletingRow}
+                          isPaymentDisabled={INFLOW_ROW_TYPES.has(selectedEntry.transactionType)}
+                          isDepositDisabled={OUTFLOW_ROW_TYPES.has(selectedEntry.transactionType)}
+                          renderColumnGroup={renderColumnGroup}
+                          onEditorChange={(field, value) => setEditor((current) => ({ ...current, [field]: value }))}
+                          onAccountLabelChange={setAccountLabel}
+                          onOpenPayeeModal={() => openPayeeModal("row")}
+                          onDelete={handleDeleteRow}
+                          onCancel={() => {
+                            setSelectedEntryId(null);
+                            setRowError(null);
+                          }}
+                          onSave={handleSaveRow}
+                        />
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            ) : null}
+
+            {entriesAfterSelected.map(renderReadOnlyEntryTable)}
+          </>
+        )}
+      </div>
+
       <PayeeSideModal
         open={isPayeeModalOpen}
         onClose={() => setIsPayeeModalOpen(false)}

@@ -259,7 +259,9 @@ export function useBankRegister() {
           transactionDate: draftTransaction.date,
           referenceNumber,
           memo: draftTransaction.memo.trim() || undefined,
-            payee: draftTransaction.payee.trim() || undefined,
+          payee: draftTransaction.payee.trim() || undefined,
+          accountLabel: draftTransaction.accountTypeLabel.trim() || undefined,
+          sourceAccountId: selectedAccountId,
           postings: selectedIsDestination
             ? [
                 { accountId: selectedAccountId, type: "DEBIT", amount },
@@ -286,6 +288,8 @@ export function useBankRegister() {
             referenceNumber,
             memo: draftTransaction.memo.trim() || undefined,
             payee: draftTransaction.payee.trim() || undefined,
+            accountLabel: draftTransaction.accountTypeLabel.trim() || undefined,
+            sourceAccountId: selectedAccountId,
             postings: [
               { accountId: selectedAccountId, type: "DEBIT", amount },
               { accountId: incomeAccount.id, type: "CREDIT", amount }
@@ -298,6 +302,8 @@ export function useBankRegister() {
             referenceNumber,
             memo: draftTransaction.memo.trim() || undefined,
             payee: draftTransaction.payee.trim() || undefined,
+            accountLabel: draftTransaction.accountTypeLabel.trim() || undefined,
+            sourceAccountId: selectedAccountId,
             postings: [
               { accountId: selectedAccountId, type: "DEBIT", amount },
               { accountId: incomeAccount.id, type: "CREDIT", amount }
@@ -322,6 +328,8 @@ export function useBankRegister() {
           referenceNumber,
           memo: draftTransaction.memo.trim() || undefined,
           payee: draftTransaction.payee.trim() || undefined,
+          accountLabel: draftTransaction.accountTypeLabel.trim() || undefined,
+          sourceAccountId: selectedAccountId,
           postings: [
             { accountId: expenseOrOffset.id, type: offsetPostingType, amount },
             { accountId: selectedAccountId, type: selectedPostingType, amount }

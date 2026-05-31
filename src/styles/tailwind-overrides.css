@@ -14,8 +14,12 @@
   --color-text-global: #21262a;
   --color-text-primary: #393A3D;
   --color-input-border-primary: #8D9096;
-  --font-size-input-text: 16px;
+  --color-icon-primary: #393A3D;
+  --font-size-input-text: 13px;
   --font-size-component-medium: 16px;
+  --font-weight-component-bold: 600;
+  --color-text-primary: #393A3D;
+  --radius-x-small: 2px;
   --color-text-disabled: #8D9096;
   --color-text-highlight: #A0CFFF;
   --color-action-passive-subtle-active: rgba(107, 108, 114, 0.2);
@@ -23,6 +27,17 @@
   --color-action-passive-subtle-hover: rgba(107, 108, 114, 0.1);
   --color-container-background-primary: #FFFFFF;
   --color-container-background-secondary: #ECEEF1;
+  --color-container-background-accent: #F4F5F8;
+  --color-divider-tertiary: #D4D7DC;
+  --color-container-border-secondary: #BABEC5;
+  --color-action-standard: #00892E;
+  --color-ui-primary: #2CA01C;
+  --color-ui-positive: #2CA01C;
+  --color-text-inverse: #FFFFFF;
+  --radius-full: 9999px;
+  --color-container-border-primary: #8D9096;
+  --color-icon-secondary: #6B6C72;
+  --color-action-standard-subtle-hover: rgba(0, 137, 46, 0.1);
 }
 
 /*
@@ -30,15 +45,19 @@
   <div className="tw-override">...</div>
 */
 .tw-override .selector-field {
-  height: 36px;
+  height: 32px;
   padding: 0.5rem 0.75rem;
   font-size: var(--font-size-input-text) !important;
   line-height: 1.2;
-  border-radius: 0.25rem;
+  border-radius: var(--radius-x-small);
   border: 1px solid #d1d5db !important;
   background-color: #ffffff !important;
   color: #111827 !important;
   transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.tw-override .selector-field::placeholder {
+  font-size: var(--font-size-input-text);
 }
 
 .tw-override .selector-field:focus-visible {
@@ -48,6 +67,35 @@
 }
 
 .tw-override .selector-field:disabled {
+  border-color: #e5e7eb !important;
+  background-color: #f3f4f6 !important;
+  color: #9ca3af !important;
+  cursor: not-allowed;
+}
+
+.tw-override .input-field {
+  height: 32px;
+  padding: 0.5rem 0.75rem;
+  font-size: var(--font-size-input-text) !important;
+  line-height: 1.2;
+  border-radius: var(--radius-x-small);
+  border: 1px solid var(--color-input-border-primary) !important;
+  background-color: #ffffff !important;
+  color: #111827 !important;
+  transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.tw-override .input-field::placeholder {
+  font-size: var(--font-size-input-text);
+}
+
+.tw-override .input-field:focus-visible {
+  outline: none;
+  border-color: var(--override-focus) !important;
+  box-shadow: 0 0 0 1px var(--override-focus) !important;
+}
+
+.tw-override .input-field:disabled {
   border-color: #e5e7eb !important;
   background-color: #f3f4f6 !important;
   color: #9ca3af !important;
@@ -130,4 +178,133 @@
 .tw-override .page-content {
   margin: 0 30px 30px 30px;
   padding: 15px;
+}
+.tw-override .register-table {
+  border-bottom: 1px solid var(--color-container-border-secondary);
+}
+.tw-override .action-bar {
+  background-color: #eceef1;
+}
+.tw-override .header-table {
+  background-color: var(--color-container-background-primary);
+  border-bottom: 2px solid var(--color-divider-tertiary);
+}
+.tw-override .header-table th {
+  font-size: 12px;
+  color: #393a3d;
+  line-height: 20px;
+  font-weight: 600;
+}
+.tw-override .header-table th.sorted {
+  background-color: var(--color-container-background-accent);
+}
+.tw-override .header-table th.border-l-custom {
+  border-left: 1px solid var(--color-divider-tertiary);
+}
+.tw-override  .content-table { 
+  background: var(--color-container-background-primary);
+}
+.tw-override  .actions-quickadd {
+  background: #f3f5f8;
+}
+.tw-override  .actions-quickadd-button {
+  padding-left: 8px;
+  color: #8d9096;
+  font-size: 13px;
+  font-weight: var(--font-weight-component-bold);
+  height: 34px;
+}
+.tw-override  .actions-quickadd-button:active {
+  text-decoration: underline;
+}
+.tw-override  .actions-quickadd-button-icon{
+  color: var(--color-icon-primary);
+  width: 28px;
+  padding: 0 3px;
+}
+.tw-override  .no-transactions-data {
+  text-align: center;
+  margin: 40px 0;
+  font-size: 13px;
+  color: var(--color-text-primary);
+}
+.tw-override  .form-control {
+  padding: 0 0.125rem;
+}
+.tw-override  .form-transaction-row {
+  background-color: #d9e4f2;
+  border-bottom: 1px solid #c5d3e2;
+}
+.tw-override  .form-transaction-row-top {
+  width: 100%;
+  padding: 14px 0 5px;
+  border-top: 3px solid #c5d3e2;
+}
+.tw-override  .form-transaction-row-bottom {
+  width: 100%;
+  padding: 0 14px 14px;
+}
+
+.tw-override .button,
+.tw-override .button:link,
+.tw-override .submit-button,
+.tw-override [type=button].button,
+.tw-override [type=submit].button {
+  border-radius: var(--radius-full);
+  background-clip: padding-box;
+  min-width: 80px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: var(--font-weight-component-bold);
+  height: 34px;
+  line-height: 34px;
+  padding: 0 20px;
+  border: 0;
+  margin: 0;
+  box-sizing: border-box;
+  color: var(--color-text-primary);
+  box-shadow: inset 0 0 0 1px #8D9096;
+  background-image: -webkit-linear-gradient(top, #FFFFFF 0%, #F4F5F8 100%);
+  background-image: linear-gradient(to bottom, #FFFFFF 0%, #F4F5F8 100%);
+  -webkit-font-smoothing: subpixel-antialiased;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.tw-override .button.primary,
+.tw-override [type=button].button.primary {
+  background-image: none;
+  background-color: var(--color-action-standard);
+  color: var(--color-text-inverse);
+  border-radius: var(--radius-full);
+  box-shadow: none;
+  border: 1px solid var(--color-ui-primary);
+}
+
+.tw-override .button.primary:hover,
+.tw-override [type=button].button.primary:hover {
+  background-color: var(--color-ui-positive);
+  border-color: var(--color-ui-positive);
+  color: var(--color-text-inverse);
+}
+
+.tw-override .button.secondary {
+  border: 1px solid #8d9096;
+  color: var(--color-text-primary);
+  background-image: none;
+  background-color: transparent;
+  box-shadow: none;
+}
+
+.tw-override .button.secondary:hover {
+  box-shadow: inset 0 0 0 1px var(--color-container-border-primary);
+  background-color: var(--color-action-standard-subtle-hover);
+}
+
+.tw-override .button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }

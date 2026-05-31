@@ -55,13 +55,15 @@ The screen is divided into 4 main sections:
 - disabled fields use gray background, gray text, and non-interactive cursor
 - table area can support horizontal scrolling on small screens, but dropdown menus must never be clipped
 - selector fields follow a shared text-field style:
-  - input text size comes from CSS variable `--font-size-input-text` (`16px`)
-  - `h-9` (36px), inherited font, `text-sm`, `leading-[1.2]`
-  - bordered white surface with small radius and transition on background/border/shadow
+  - input text size comes from CSS variable `--font-size-input-text` (`13px`) for value and placeholder
+  - `32px` height, inherited font, `text-sm`, `leading-[1.2]`
+  - bordered white surface with radius token `--radius-x-small` (`2px`) and transition on background/border/shadow
   - custom chevron icon uses the shared 24x24 down-chevron SVG
   - supports width behavior: parent `min-w-fit w-fit` keeps compact `208px`; `w-full` expands to container width
 - `Register bank`, `Payee`, and `Account` must use one shared reusable `SelectField` component
 - `SelectField` supports optional `+ Add new` action controlled by prop and callback
+- transaction form inputs use shared `input-field` class in `src/styles/tailwind-overrides.css`
+- `input-field` matches select field height, border appearance, and focus/disabled states
 - `SelectField` dropdown must support wider readable width for long option texts and be left-aligned slightly outside input edge
 - selected option in `SelectField` uses `--font-size-component-medium` and passive subtle background states:
   - `--color-action-passive-subtle-hover`
@@ -140,7 +142,7 @@ Supported default options:
 The toolbar uses a split action control:
 
 - Primary button: `Add <Selected Transaction Type>`
-- Secondary button: chevron down to open transaction type menu
+- Secondary button: triangle-down arrow icon to open transaction type menu
 
 Behavior:
 
@@ -188,6 +190,22 @@ For `Charitable donations (Equity)`, available types must be:
 
 This is the main ledger view.
 
+Structure is split into 3 areas:
+
+- `ActionBar`: filter/status actions row above table header
+- `HeaderTable`: standalone header-only table (column titles)
+- `ContentTable`: quick-add toolbar + row tables
+
+`ContentTable` behavior:
+
+- first block is `actions-quickadd` and renders `ActionToolbar` (`Add <Type>`)
+- draft add-transaction form renders immediately below `actions-quickadd`
+- draft form uses the same column width distribution as `HeaderTable`
+- checkmark (`✓`) column is intentionally empty in draft mode
+- transaction rows render as individual table blocks (one table per row item)
+- when empty, show: `There are no transactions matching the selected criteria`
+- empty-state message remains visible even while draft add form is open; it hides only after at least one saved transaction exists
+
 ### Columns
 
 Header row 1:
@@ -204,10 +222,21 @@ Header row 2:
 
 - Type (under Ref No)
 - Account (under Payee)
+- all remaining header cells in row 2 render as empty placeholders to preserve full grid alignment
 
 Header alignment:
 
 - all header labels are top-aligned
+- header cells use fixed base widths:
+  - Date: `125px`
+  - Ref No / Type: `100px`
+  - Payee / Account: `250px`
+  - Memo: `150px`
+  - Payment: `120px` (right-aligned)
+  - Deposit: `120px` (right-aligned)
+  - Status/Checkmark: `60px` (center)
+  - Balance: `120px` (right-aligned)
+- when extra horizontal space exists, table can redistribute width naturally
 
 ---
 

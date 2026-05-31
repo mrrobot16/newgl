@@ -238,6 +238,18 @@ function createRegisterEntries(store: Store, transaction: Transaction): void {
   });
 
   perAccount.forEach((value, accountId) => {
+    const counterpartyAccountNames = [
+      ...new Set(
+        transaction.postings
+          .filter((posting) => posting.accountId !== accountId)
+          .map((posting) => requireAccount(store, posting.accountId).name)
+      )
+    ];
+    const displayAccountLabel =
+      transaction.sourceAccountId === accountId
+        ? transaction.accountLabel ?? counterpartyAccountNames[0]
+        : counterpartyAccountNames[0];
+
     const entry: RegisterEntry = {
       id: createId(),
       accountId,
@@ -245,6 +257,7 @@ function createRegisterEntries(store: Store, transaction: Transaction): void {
       transactionType: transaction.type,
       refNumber: transaction.referenceNumber,
       payee: transaction.payee,
+      accountLabel: displayAccountLabel,
       memo: transaction.memo,
       payment: value.payment > 0 ? value.payment : undefined,
       deposit: value.deposit > 0 ? value.deposit : undefined,
@@ -342,6 +355,8 @@ export class MockTransactionService implements TransactionService {
       referenceNumber: input.referenceNumber,
       memo: input.memo,
       payee: input.payee,
+      accountLabel: input.accountLabel,
+      sourceAccountId: input.sourceAccountId,
       postings: input.postings,
       createdAt: nowIso(),
       updatedAt: nowIso(),
