@@ -22,6 +22,8 @@ export function BankRegisterLayout() {
     setSelectedAccountId,
     addSelectedTransaction,
     cancelDraftTransaction,
+    cycleDraftReconcileStatus,
+    cycleReconcileStatus,
     deleteRegisterEntryInline,
     selectTransactionType,
     saveDraftTransaction,
@@ -70,8 +72,10 @@ export function BankRegisterLayout() {
           onDraftFieldChange={updateDraftField}
           onDraftSave={saveDraftTransaction}
           onDraftCancel={cancelDraftTransaction}
+          onDraftReconcileCycle={cycleDraftReconcileStatus}
           onUpdateEntry={updateRegisterEntryInline}
           onDeleteEntry={deleteRegisterEntryInline}
+          onCycleReconcileStatus={cycleReconcileStatus}
           availableTransactionTypes={availableTransactionTypes}
           selectedTransactionType={selectedTransactionType}
           onAddSelectedTransaction={addSelectedTransaction}

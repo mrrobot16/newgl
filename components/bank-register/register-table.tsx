@@ -4,9 +4,11 @@ import { ActionToolbar } from "@/components/bank-register/action-toolbar";
 import { EditTransactionForm } from "@/components/bank-register/edit-transaction-form";
 import { PayeeSideModal } from "@/components/bank-register/payee-side-modal";
 import type { PayeeOption } from "@/components/bank-register/payee-side-modal";
-import { Button } from "@/components/ui/button";
-import { ChevronDown, Funnel, Printer, Settings2, Upload } from "lucide-react";
+import { Funnel, Printer, Settings2, Upload } from "lucide-react";
 import type { RegisterEntry } from "@/modules/accounting/domain/models";
+import {
+  nextReconcileStatus
+} from "@/modules/accounting/presentation/hooks/use-bank-register";
 import type {
   DraftTransactionErrors,
   DraftTransactionForm,
@@ -34,8 +36,10 @@ type RegisterTableProps = {
   ) => void;
   onDraftSave: () => void;
   onDraftCancel: () => void;
+  onDraftReconcileCycle: () => void;
   onUpdateEntry: (entryId: string, input: InlineEntryEditorInput) => Promise<void>;
   onDeleteEntry: (entryId: string) => Promise<void>;
+  onCycleReconcileStatus: (entryId: string) => void;
   availableTransactionTypes: BankRegisterTransactionTypeOption[];
   selectedTransactionType: BankRegisterTransactionTypeId;
   onAddSelectedTransaction: () => void;
@@ -81,8 +85,10 @@ export function RegisterTable({
   onDraftFieldChange,
   onDraftSave,
   onDraftCancel,
+  onDraftReconcileCycle,
   onUpdateEntry,
   onDeleteEntry,
+  onCycleReconcileStatus,
   availableTransactionTypes,
   selectedTransactionType,
   onAddSelectedTransaction,
@@ -98,7 +104,8 @@ export function RegisterTable({
     payee: "",
     memo: "",
     payment: "",
-    deposit: ""
+    deposit: "",
+    reconcileStatus: ""
   });
   const [accountLabel, setAccountLabel] = useState("");
   const [payees, setPayees] = useState<PayeeOption[]>([]);
@@ -167,9 +174,14 @@ export function RegisterTable({
       payee: entry.payee ?? "",
       memo: entry.memo ?? "",
       payment: entry.payment ? String(entry.payment) : "",
-      deposit: entry.deposit ? String(entry.deposit) : ""
+      deposit: entry.deposit ? String(entry.deposit) : "",
+      reconcileStatus: entry.reconcileStatus ?? ""
     });
     setAccountLabel(entry.accountLabel ?? "");
+  }
+
+  function cycleEditorReconcileStatus() {
+    setEditor((current) => ({ ...current, reconcileStatus: nextReconcileStatus(current.reconcileStatus) }));
   }
 
   function openPayeeModal(target: "draft" | "row") {
@@ -252,15 +264,15 @@ export function RegisterTable({
             <td className="border-l border-l-dotted border-l-[var(--color-divider-tertiary)] p-2 text-[13px] text-right align-top text-gray-800">
               {entry.deposit ? entry.deposit.toFixed(2) : ""}
             </td>
-            <td className="border-l border-l-dotted border-l-[var(--color-divider-tertiary)] p-2 text-[13px] text-center align-top text-gray-400">
-              
+            <td className="border-l text-center border-l-dotted border-l-[var(--color-divider-tertiary)] p-2 text-[13px] align-top text-gray-800">
+              {entry.reconcileStatus}
             </td>
-            <td className="p-2 text-[13px] text-right align-top font-medium text-gray-900">
+            <td className="p-2 border-l border-l-dotted border-l-[var(--color-divider-tertiary)] text-[13px] text-right align-top font-medium text-gray-900">
               {entry.runningBalance.toFixed(2)}
             </td>
           </tr>
           <tr
-            className={`cursor-pointer border-b border-gray-100 bg-[#f9fafb] group-hover:bg-[#ebf0f7] ${rowStyle(entry.status)}`}
+            className={`cursor-pointer border-b border-gray-100 bg-[#f9fafb] group-hover:bg-[#ebf0f7]`}
             onClick={() => openRowEditor(entry)}
           >
             <td className="p-2 text-[13px] align-top text-gray-500">
@@ -284,7 +296,7 @@ export function RegisterTable({
             <td className="border-l border-l-dotted border-l-[var(--color-divider-tertiary)] p-2 text-[13px] text-center align-top text-gray-500">
               &nbsp;
             </td>
-            <td className="p-2 text-[13px] text-right align-top text-gray-500">&nbsp;</td>
+            <td className="p-2 border-l border-l-dotted border-l-[var(--color-divider-tertiary)] text-[13px] text-right align-top text-gray-500">&nbsp;</td>
           </tr>
         </tbody>
       </table>
@@ -413,6 +425,7 @@ export function RegisterTable({
             onDraftFieldChange={onDraftFieldChange}
             onDraftSave={onDraftSave}
             onDraftCancel={onDraftCancel}
+            onReconcileCycle={onDraftReconcileCycle}
             onOpenPayeeModal={() => openPayeeModal("draft")}
           />
         ) : null}
@@ -442,6 +455,7 @@ export function RegisterTable({
                           isDepositDisabled={OUTFLOW_ROW_TYPES.has(selectedEntry.transactionType)}
                           renderColumnGroup={renderColumnGroup}
                           onEditorChange={(field, value) => setEditor((current) => ({ ...current, [field]: value }))}
+                          onReconcileCycle={cycleEditorReconcileStatus}
                           onAccountLabelChange={setAccountLabel}
                           onOpenPayeeModal={() => openPayeeModal("row")}
                           onDelete={handleDeleteRow}

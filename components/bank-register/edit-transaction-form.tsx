@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { ReconcileStatusCell } from "@/components/bank-register/reconcile-status";
 import { SelectField } from "@/components/bank-register/select-field";
 import type { SelectFieldOption } from "@/components/bank-register/select-field";
 import { Button } from "@/components/ui/button";
@@ -17,6 +18,7 @@ type EditTransactionFormProps = {
   isDepositDisabled: boolean;
   renderColumnGroup: () => ReactNode;
   onEditorChange: (field: keyof InlineEntryEditorInput, value: string) => void;
+  onReconcileCycle: () => void;
   onAccountLabelChange: (value: string) => void;
   onOpenPayeeModal: () => void;
   onDelete: () => void;
@@ -36,6 +38,7 @@ export function EditTransactionForm({
   isDepositDisabled,
   renderColumnGroup,
   onEditorChange,
+  onReconcileCycle,
   onAccountLabelChange,
   onOpenPayeeModal,
   onDelete,
@@ -116,7 +119,7 @@ export function EditTransactionForm({
                   className="input-field w-full text-right placeholder:text-gray-400"
                 />
               </td>
-              <td className="form-control text-center text-gray-400" />
+              <ReconcileStatusCell status={editor.reconcileStatus} onCycle={onReconcileCycle} />
               <td className="form-control">
                 <div className="rounded border border-gray-200 bg-gray-100 px-2 py-1 text-right text-xs text-gray-500">-</div>
               </td>

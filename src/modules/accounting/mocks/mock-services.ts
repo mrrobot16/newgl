@@ -6,6 +6,7 @@ import type {
   CreateTransactionInput,
   LedgerPosting,
   PostingEntryType,
+  ReconcileStatus,
   RegisterEntry,
   Transaction,
   UpdateAccountInput
@@ -245,10 +246,12 @@ function createRegisterEntries(store: Store, transaction: Transaction): void {
           .map((posting) => requireAccount(store, posting.accountId).name)
       )
     ];
-    const displayAccountLabel =
-      transaction.sourceAccountId === accountId
-        ? transaction.accountLabel ?? counterpartyAccountNames[0]
-        : counterpartyAccountNames[0];
+    const isSourceAccountEntry = transaction.sourceAccountId === accountId;
+    const displayAccountLabel = isSourceAccountEntry
+      ? transaction.accountLabel ?? counterpartyAccountNames[0]
+      : counterpartyAccountNames[0];
+    const entryReconcileStatus =
+      isSourceAccountEntry && transaction.reconcileStatus ? transaction.reconcileStatus : "";
 
     const entry: RegisterEntry = {
       id: createId(),
@@ -261,6 +264,7 @@ function createRegisterEntries(store: Store, transaction: Transaction): void {
       memo: transaction.memo,
       payment: value.payment > 0 ? value.payment : undefined,
       deposit: value.deposit > 0 ? value.deposit : undefined,
+      reconcileStatus: entryReconcileStatus,
       runningBalance: 0,
       postedAt: nowIso(),
       date: transaction.transactionDate,
@@ -357,6 +361,7 @@ export class MockTransactionService implements TransactionService {
       payee: input.payee,
       accountLabel: input.accountLabel,
       sourceAccountId: input.sourceAccountId,
+      reconcileStatus: input.reconcileStatus,
       postings: input.postings,
       createdAt: nowIso(),
       updatedAt: nowIso(),
@@ -569,6 +574,7 @@ export class MockRegisterService implements RegisterService {
     input: Pick<RegisterEntry, "date" | "refNumber" | "payee" | "memo"> & {
       payment?: number;
       deposit?: number;
+      reconcileStatus?: ReconcileStatus;
     }
   ): Promise<RegisterEntry> {
     const entry = this.store.registerEntries.find((item) => item.id === entryId);
@@ -585,6 +591,9 @@ export class MockRegisterService implements RegisterService {
     entry.memo = input.memo;
     entry.payment = input.payment && input.payment > 0 ? input.payment : undefined;
     entry.deposit = input.deposit && input.deposit > 0 ? input.deposit : undefined;
+    if (input.reconcileStatus !== undefined) {
+      entry.reconcileStatus = input.reconcileStatus;
+    }
 
     const transaction = this.store.transactions.find((item) => item.id === entry.transactionId);
     if (transaction) {
@@ -592,6 +601,9 @@ export class MockRegisterService implements RegisterService {
       transaction.referenceNumber = input.refNumber;
       transaction.payee = input.payee;
       transaction.memo = input.memo;
+      if (input.reconcileStatus !== undefined) {
+        transaction.reconcileStatus = input.reconcileStatus;
+      }
       transaction.updatedAt = nowIso();
     }
 
@@ -617,6 +629,15 @@ export class MockRegisterService implements RegisterService {
       updatedAt: account.updatedAt
     });
 
+    return entry;
+  }
+
+  async setReconcileStatus(entryId: string, status: ReconcileStatus): Promise<RegisterEntry> {
+    const entry = this.store.registerEntries.find((item) => item.id === entryId);
+    if (!entry) {
+      throw new Error(`Register entry ${entryId} not found`);
+    }
+    entry.reconcileStatus = status;
     return entry;
   }
 

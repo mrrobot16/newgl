@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { ACCOUNT_FIELD_OPTIONS } from "@/components/bank-register/account-field-options";
+import { ReconcileStatusCell } from "@/components/bank-register/reconcile-status";
 import { SelectField } from "@/components/bank-register/select-field";
 import type { SelectFieldOption } from "@/components/bank-register/select-field";
 import { Button } from "@/components/ui/button";
@@ -23,6 +24,7 @@ type AddTransactionFormProps = {
   ) => void;
   onDraftSave: () => void;
   onDraftCancel: () => void;
+  onReconcileCycle: () => void;
   onOpenPayeeModal: () => void;
 };
 
@@ -38,6 +40,7 @@ export function AddTransactionForm({
   onDraftFieldChange,
   onDraftSave,
   onDraftCancel,
+  onReconcileCycle,
   onOpenPayeeModal
 }: AddTransactionFormProps) {
   return (
@@ -119,7 +122,7 @@ export function AddTransactionForm({
                 />
                 {draftErrors.deposit ? <p className="mt-1 text-xs text-red-600">{draftErrors.deposit}</p> : null}
               </td>
-              <td className="form-control text-center text-gray-400" />
+              <ReconcileStatusCell status={draftTransaction.reconcileStatus} onCycle={onReconcileCycle} />
               <td className="form-control">
                 <div className="rounded border border-gray-200 bg-gray-100 px-2 py-1 text-right text-xs text-gray-500">-</div>
               </td>
