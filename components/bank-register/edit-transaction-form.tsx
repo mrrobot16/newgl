@@ -3,6 +3,7 @@ import { ReconcileStatusCell } from "@/components/bank-register/reconcile-status
 import { SelectField } from "@/components/bank-register/select-field";
 import type { SelectFieldOption } from "@/components/bank-register/select-field";
 import { Button } from "@/components/ui/button";
+import { InputField } from "@/components/ui/input-field";
 import type { RegisterEntry } from "@/modules/accounting/domain/models";
 import type { InlineEntryEditorInput } from "@/modules/accounting/presentation/hooks/use-bank-register";
 
@@ -53,21 +54,21 @@ export function EditTransactionForm({
           <tbody>
             <tr className="align-top">
               <td className="form-control">
-                <input
+                <InputField
                   type="date"
                   value={editor.date}
                   onChange={(event) => onEditorChange("date", event.target.value)}
-                  className="input-field w-full placeholder:text-gray-400"
+                  className="w-full placeholder:text-gray-400"
                 />
               </td>
               <td className="form-control">
-                <input
+                <InputField
                   type="text"
                   value={editor.refNo}
                   onChange={(event) => onEditorChange("refNo", event.target.value)}
-                  className="input-field w-full placeholder:text-gray-400"
+                  className="w-full placeholder:text-gray-400"
                 />
-                <input type="text" value={entry.transactionType} disabled className="input-field mt-1 w-full" />
+                <InputField type="text" value={entry.transactionType} disabled className="mt-1 w-full" />
               </td>
               <td className="form-control">
                 <SelectField
@@ -77,26 +78,26 @@ export function EditTransactionForm({
                   onChange={(value) => onEditorChange("payee", value)}
                   onAddNew={onOpenPayeeModal}
                 />
-                <input
+                <InputField
                   type="text"
                   value={accountLabel}
                   disabled
                   onChange={(event) => onAccountLabelChange(event.target.value)}
                   placeholder="Account"
-                  className="input-field mt-1 w-full"
+                  className="mt-1 w-full"
                 />
               </td>
               <td className="form-control">
-                <input
+                <InputField
                   type="text"
                   value={editor.memo}
                   onChange={(event) => onEditorChange("memo", event.target.value)}
                   placeholder="Memo"
-                  className="input-field w-full placeholder:text-gray-400"
+                  className="w-full placeholder:text-gray-400"
                 />
               </td>
               <td className="form-control">
-                <input
+                <InputField
                   type="number"
                   min="0"
                   step="0.01"
@@ -104,11 +105,11 @@ export function EditTransactionForm({
                   disabled={isPaymentDisabled}
                   onChange={(event) => onEditorChange("payment", event.target.value)}
                   placeholder="0.00"
-                  className="input-field w-full text-right placeholder:text-gray-400"
+                  className="w-full text-right placeholder:text-gray-400"
                 />
               </td>
               <td className="form-control">
-                <input
+                <InputField
                   type="number"
                   min="0"
                   step="0.01"
@@ -116,7 +117,7 @@ export function EditTransactionForm({
                   disabled={isDepositDisabled}
                   onChange={(event) => onEditorChange("deposit", event.target.value)}
                   placeholder="0.00"
-                  className="input-field w-full text-right placeholder:text-gray-400"
+                  className="w-full text-right placeholder:text-gray-400"
                 />
               </td>
               <ReconcileStatusCell status={editor.reconcileStatus} onCycle={onReconcileCycle} />

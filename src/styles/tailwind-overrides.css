@@ -48,6 +48,7 @@
   --gbsg-nav-bar-icon-color-inverse: #ffffff;
   --font-weight-body-semibold: 500;
   --radius-large: 8px;
+  --color-link-text: #0365AC;
 }
 
 /*
@@ -191,6 +192,12 @@
 }
 .tw-override .register-table {
   border-bottom: 1px solid var(--color-container-border-secondary);
+}
+.tw-override .form-popover {
+  max-width: 530px;
+  overflow: visible;
+  padding: 0;
+  padding-top: 5px;
 }
 .tw-override .action-bar {
   background-color: #eceef1;

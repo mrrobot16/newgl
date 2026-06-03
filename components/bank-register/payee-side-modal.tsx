@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { InputField } from "@/components/ui/input-field";
 
 export type PayeeKind = "CUSTOMER" | "VENDOR" | "EMPLOYEE";
 
@@ -138,7 +139,7 @@ function Field({
   return (
     <label className="flex flex-col gap-1 text-xs text-slate-700">
       <span>{label}</span>
-      <input
+      <InputField
         type={type}
         value={value}
         onChange={(event) => onChange(event.target.value)}

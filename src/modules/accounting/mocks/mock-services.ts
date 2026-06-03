@@ -100,6 +100,159 @@ const SEED_ACCOUNTS: Array<{ name: string; category: Account["category"] }> = [
   { name: "Sales tax to pay", category: "OTHER_CURRENT_LIABILITY" }
 ];
 
+type SeedFlow = "INFLOW" | "OUTFLOW";
+
+type SeedRegisterTransactionSpec = {
+  type: Transaction["type"];
+  date: string;
+  ref: string;
+  memo: string;
+  payee: string;
+  sourceAccountName: string;
+  counterpartyAccountName: string;
+  amount: number;
+  flow: SeedFlow;
+  reconcileStatus?: ReconcileStatus;
+};
+
+const SEED_REGISTER_TRANSACTIONS: SeedRegisterTransactionSpec[] = [
+  {
+    type: "DEPOSIT",
+    date: "2026-05-01",
+    ref: "TX-1001",
+    memo: "Initial owner contribution",
+    payee: "Owner",
+    sourceAccountName: "Cash on hand",
+    counterpartyAccountName: "Owners investment",
+    amount: 1200,
+    flow: "INFLOW",
+    reconcileStatus: "C"
+  },
+  {
+    type: "CHECK",
+    date: "2026-05-03",
+    ref: "TX-1002",
+    memo: "Office supplies",
+    payee: "Office Depot",
+    sourceAccountName: "Cash on hand",
+    counterpartyAccountName: "Personal expense",
+    amount: 145.5,
+    flow: "OUTFLOW"
+  },
+  {
+    type: "EXPENSE",
+    date: "2026-05-05",
+    ref: "TX-1003",
+    memo: "Software subscription",
+    payee: "SaaS Vendor",
+    sourceAccountName: "Cash on hand",
+    counterpartyAccountName: "Apps and software (> $200)",
+    amount: 89,
+    flow: "OUTFLOW"
+  },
+  {
+    type: "RECEIVE_PAYMENT",
+    date: "2026-05-06",
+    ref: "TX-1004",
+    memo: "Client payment invoice #44",
+    payee: "Client A",
+    sourceAccountName: "Cash on hand",
+    counterpartyAccountName: "Personal income",
+    amount: 680,
+    flow: "INFLOW",
+    reconcileStatus: "R"
+  },
+  {
+    type: "TRANSFER",
+    date: "2026-05-08",
+    ref: "TX-1005",
+    memo: "Move funds to card account",
+    payee: "Internal transfer",
+    sourceAccountName: "Cash on hand",
+    counterpartyAccountName: "Credit Card Payable",
+    amount: 250,
+    flow: "OUTFLOW"
+  },
+  {
+    type: "BILL_PAYMENT",
+    date: "2026-05-10",
+    ref: "TX-1006",
+    memo: "Utility bill payment",
+    payee: "City Utilities",
+    sourceAccountName: "Cash on hand",
+    counterpartyAccountName: "Personal expense",
+    amount: 110.75,
+    flow: "OUTFLOW"
+  },
+  {
+    type: "DEPOSIT",
+    date: "2026-05-11",
+    ref: "TX-1007",
+    memo: "Misc sales deposit",
+    payee: "POS batch",
+    sourceAccountName: "Cash on hand",
+    counterpartyAccountName: "Personal income",
+    amount: 420.35,
+    flow: "INFLOW"
+  },
+  {
+    type: "CHECK",
+    date: "2026-05-13",
+    ref: "TX-1008",
+    memo: "Rent payment",
+    payee: "Landlord",
+    sourceAccountName: "Cash on hand",
+    counterpartyAccountName: "Mortgage",
+    amount: 320,
+    flow: "OUTFLOW",
+    reconcileStatus: "C"
+  },
+  {
+    type: "EXPENSE",
+    date: "2026-05-16",
+    ref: "TX-1009",
+    memo: "Phone reimbursement",
+    payee: "Carrier",
+    sourceAccountName: "Cash on hand",
+    counterpartyAccountName: "Phone (> $200)",
+    amount: 60,
+    flow: "OUTFLOW"
+  },
+  {
+    type: "TRANSFER",
+    date: "2026-05-18",
+    ref: "TX-1010",
+    memo: "Transfer back from card",
+    payee: "Internal transfer",
+    sourceAccountName: "Cash on hand",
+    counterpartyAccountName: "Credit Card Payable",
+    amount: 180,
+    flow: "INFLOW"
+  },
+  {
+    type: "DEPOSIT",
+    date: "2026-05-21",
+    ref: "TX-1011",
+    memo: "Owner top-up",
+    payee: "Owner",
+    sourceAccountName: "Cash on hand",
+    counterpartyAccountName: "Owners investment",
+    amount: 500,
+    flow: "INFLOW"
+  },
+  {
+    type: "CHECK",
+    date: "2026-05-24",
+    ref: "TX-1012",
+    memo: "Tax prepayment",
+    payee: "IRS",
+    sourceAccountName: "Cash on hand",
+    counterpartyAccountName: "Federal estimated tax",
+    amount: 210,
+    flow: "OUTFLOW"
+  }
+];
+
 function buildMockData(): Store {
   const createdAt = nowIso();
   const accounts: Account[] = SEED_ACCOUNTS.map((seed, index) => ({
@@ -687,8 +840,102 @@ export class MockRegisterService implements RegisterService {
   }
 }
 
+function seedDefaultRegisterTransactions(store: Store): void {
+  const affectedAccountIds: string[] = [];
+
+  SEED_REGISTER_TRANSACTIONS.forEach((seed) => {
+    const sourceAccount = store.accounts.find((account) => account.name === seed.sourceAccountName);
+    const counterpartyAccount = store.accounts.find((account) => account.name === seed.counterpartyAccountName);
+    if (!sourceAccount || !counterpartyAccount || sourceAccount.id === counterpartyAccount.id) {
+      return;
+    }
+
+    const createdAt = nowIso();
+    const sourcePostingType: PostingEntryType = seed.flow === "INFLOW" ? "DEBIT" : "CREDIT";
+    const counterpartyPostingType: PostingEntryType = sourcePostingType === "DEBIT" ? "CREDIT" : "DEBIT";
+
+    const transaction: Transaction = {
+      id: createId(),
+      type: seed.type,
+      status: "POSTED",
+      transactionDate: seed.date,
+      referenceNumber: seed.ref,
+      memo: seed.memo,
+      payee: seed.payee,
+      accountLabel: seed.counterpartyAccountName,
+      sourceAccountId: sourceAccount.id,
+      reconcileStatus: seed.reconcileStatus,
+      postings: [
+        { accountId: sourceAccount.id, type: sourcePostingType, amount: seed.amount },
+        { accountId: counterpartyAccount.id, type: counterpartyPostingType, amount: seed.amount }
+      ],
+      createdAt,
+      updatedAt: createdAt,
+      postedAt: createdAt,
+      createdBy: "seed"
+    };
+
+    store.transactions.push(transaction);
+
+    const sourceLedgerPosting: LedgerPosting = {
+      id: createId(),
+      transactionId: transaction.id,
+      accountId: sourceAccount.id,
+      accountCode: sourceAccount.code,
+      accountName: sourceAccount.name,
+      entryType: sourcePostingType,
+      amount: seed.amount,
+      currency: sourceAccount.currency,
+      exchangeRate: 1,
+      postingDate: seed.date,
+      fiscalPeriod: postingFiscalPeriod(seed.date),
+      memo: seed.memo,
+      referenceNumber: seed.ref,
+      sourceDocumentType: seed.type,
+      sourceDocumentId: transaction.id,
+      reconciliationStatus: "UNRECONCILED",
+      status: "POSTED",
+      createdBy: "seed",
+      createdAt,
+      postedAt: createdAt
+    };
+
+    const counterpartyLedgerPosting: LedgerPosting = {
+      id: createId(),
+      transactionId: transaction.id,
+      accountId: counterpartyAccount.id,
+      accountCode: counterpartyAccount.code,
+      accountName: counterpartyAccount.name,
+      entryType: counterpartyPostingType,
+      amount: seed.amount,
+      currency: counterpartyAccount.currency,
+      exchangeRate: 1,
+      postingDate: seed.date,
+      fiscalPeriod: postingFiscalPeriod(seed.date),
+      memo: seed.memo,
+      referenceNumber: seed.ref,
+      sourceDocumentType: seed.type,
+      sourceDocumentId: transaction.id,
+      reconciliationStatus: "UNRECONCILED",
+      status: "POSTED",
+      createdBy: "seed",
+      createdAt,
+      postedAt: createdAt
+    };
+
+    store.ledgerPostings.push(sourceLedgerPosting, counterpartyLedgerPosting);
+    createRegisterEntries(store, transaction);
+    affectedAccountIds.push(sourceAccount.id, counterpartyAccount.id);
+  });
+
+  if (affectedAccountIds.length > 0) {
+    updateAccountBalances(store, affectedAccountIds);
+  }
+}
+
 export function createMockAccountingServices() {
   const store = buildMockData();
+  seedDefaultRegisterTransactions(store);
   return {
     accountService: new MockAccountService(store),
     ledgerService: new MockLedgerService(store),

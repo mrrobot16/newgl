@@ -4,6 +4,7 @@ import { ReconcileStatusCell } from "@/components/bank-register/reconcile-status
 import { SelectField } from "@/components/bank-register/select-field";
 import type { SelectFieldOption } from "@/components/bank-register/select-field";
 import { Button } from "@/components/ui/button";
+import { InputField } from "@/components/ui/input-field";
 import type {
   DraftTransactionErrors,
   DraftTransactionForm
@@ -51,23 +52,23 @@ export function AddTransactionForm({
           <tbody>
             <tr className="align-top">
               <td className="form-control">
-                <input
+                <InputField
                   type="date"
                   value={draftTransaction.date}
                   onChange={(event) => onDraftFieldChange("date", event.target.value)}
-                  className="input-field w-full placeholder:text-gray-400"
+                  className="w-full placeholder:text-gray-400"
                 />
                 {draftErrors.date ? <p className="mt-1 text-xs text-red-600">{draftErrors.date}</p> : null}
               </td>
               <td className="form-control">
-                <input
+                <InputField
                   type="text"
                   value={draftTransaction.refNo}
                   onChange={(event) => onDraftFieldChange("refNo", event.target.value)}
                   placeholder="Ref No"
-                  className="input-field w-full placeholder:text-gray-400"
+                  className="w-full placeholder:text-gray-400"
                 />
-                <input type="text" value={draftTransaction.transactionTypeLabel} disabled className="input-field mt-1 w-full" />
+                <InputField type="text" value={draftTransaction.transactionTypeLabel} disabled className="mt-1 w-full" />
               </td>
               <td className="form-control">
                 <SelectField
@@ -88,16 +89,16 @@ export function AddTransactionForm({
                 {draftErrors.accountTypeLabel ? <p className="mt-1 text-xs text-red-600">{draftErrors.accountTypeLabel}</p> : null}
               </td>
               <td className="form-control">
-                <input
+                <InputField
                   type="text"
                   value={draftTransaction.memo}
                   onChange={(event) => onDraftFieldChange("memo", event.target.value)}
                   placeholder="Memo"
-                  className="input-field w-full placeholder:text-gray-400"
+                  className="w-full placeholder:text-gray-400"
                 />
               </td>
               <td className="form-control">
-                <input
+                <InputField
                   type="number"
                   min="0"
                   step="0.01"
@@ -105,12 +106,12 @@ export function AddTransactionForm({
                   disabled={isDraftInflowType}
                   onChange={(event) => onDraftFieldChange("payment", event.target.value)}
                   placeholder="0.00"
-                  className="input-field w-full text-right placeholder:text-gray-400"
+                  className="w-full text-right placeholder:text-gray-400"
                 />
                 {draftErrors.payment ? <p className="mt-1 text-xs text-red-600">{draftErrors.payment}</p> : null}
               </td>
               <td className="form-control">
-                <input
+                <InputField
                   type="number"
                   min="0"
                   step="0.01"
@@ -118,7 +119,7 @@ export function AddTransactionForm({
                   disabled={isDraftOutflowType}
                   onChange={(event) => onDraftFieldChange("deposit", event.target.value)}
                   placeholder="0.00"
-                  className="input-field w-full text-right placeholder:text-gray-400"
+                  className="w-full text-right placeholder:text-gray-400"
                 />
                 {draftErrors.deposit ? <p className="mt-1 text-xs text-red-600">{draftErrors.deposit}</p> : null}
               </td>
