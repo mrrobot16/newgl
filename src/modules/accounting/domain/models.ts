@@ -85,6 +85,8 @@ export const transactionStatusSchema = z.enum([
   "DELETED"
 ]);
 
+export const reconcileStatusSchema = z.enum(["", "C", "R"]);
+
 export const transactionPostingInputSchema = z.object({
   accountId: z.string().uuid(),
   type: postingEntryTypeSchema,
@@ -101,6 +103,7 @@ export const transactionSchema = z.object({
   payee: z.string().optional(),
   accountLabel: z.string().optional(),
   sourceAccountId: z.string().uuid().optional(),
+  reconcileStatus: reconcileStatusSchema.optional(),
   postings: z.array(transactionPostingInputSchema).min(2),
   createdBy: z.string().optional(),
   createdAt: z.string().datetime().optional(),
@@ -155,6 +158,7 @@ export const registerEntrySchema = z.object({
   memo: z.string().optional(),
   payment: z.number().min(0).optional(),
   deposit: z.number().min(0).optional(),
+  reconcileStatus: reconcileStatusSchema.default(""),
   runningBalance: z.number(),
   postedAt: z.string().datetime().optional(),
   date: z.string(),
@@ -168,6 +172,7 @@ export type ChartOfAccount = z.infer<typeof chartOfAccountSchema>;
 export type PostingEntryType = z.infer<typeof postingEntryTypeSchema>;
 export type TransactionType = z.infer<typeof transactionTypeSchema>;
 export type TransactionStatus = z.infer<typeof transactionStatusSchema>;
+export type ReconcileStatus = z.infer<typeof reconcileStatusSchema>;
 export type TransactionPostingInput = z.infer<typeof transactionPostingInputSchema>;
 export type Transaction = z.infer<typeof transactionSchema>;
 export type LedgerPosting = z.infer<typeof ledgerPostingSchema>;
@@ -190,5 +195,13 @@ export type UpdateAccountInput = Partial<
 
 export type CreateTransactionInput = Pick<
   Transaction,
-  "type" | "transactionDate" | "referenceNumber" | "memo" | "payee" | "accountLabel" | "sourceAccountId" | "postings"
+  | "type"
+  | "transactionDate"
+  | "referenceNumber"
+  | "memo"
+  | "payee"
+  | "accountLabel"
+  | "sourceAccountId"
+  | "reconcileStatus"
+  | "postings"
 >;

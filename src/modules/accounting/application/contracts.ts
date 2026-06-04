@@ -4,6 +4,7 @@ import type {
   CreateAccountInput,
   CreateTransactionInput,
   LedgerPosting,
+  ReconcileStatus,
   RegisterEntry,
   Transaction,
   UpdateAccountInput
@@ -46,8 +47,10 @@ export interface RegisterService {
     input: Pick<RegisterEntry, "date" | "refNumber" | "payee" | "memo"> & {
       payment?: number;
       deposit?: number;
+      reconcileStatus?: ReconcileStatus;
     }
   ): Promise<RegisterEntry>;
+  setReconcileStatus(entryId: string, status: ReconcileStatus): Promise<RegisterEntry>;
   deleteRegisterEntry(entryId: string): Promise<RegisterEntry>;
 }
 

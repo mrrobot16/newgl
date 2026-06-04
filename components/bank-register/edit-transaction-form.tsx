@@ -1,7 +1,9 @@
-import type { ReactNode } from "react";
+import { ReconcileStatusCell } from "@/components/bank-register/reconcile-status";
+import { RegisterTableColumnGroup } from "@/components/bank-register/register-table-column-group";
 import { SelectField } from "@/components/bank-register/select-field";
 import type { SelectFieldOption } from "@/components/bank-register/select-field";
 import { Button } from "@/components/ui/button";
+import { InputField } from "@/components/ui/input-field";
 import type { RegisterEntry } from "@/modules/accounting/domain/models";
 import type { InlineEntryEditorInput } from "@/modules/accounting/presentation/hooks/use-bank-register";
 
@@ -15,8 +17,8 @@ type EditTransactionFormProps = {
   isDeletingRow: boolean;
   isPaymentDisabled: boolean;
   isDepositDisabled: boolean;
-  renderColumnGroup: () => ReactNode;
   onEditorChange: (field: keyof InlineEntryEditorInput, value: string) => void;
+  onReconcileCycle: () => void;
   onAccountLabelChange: (value: string) => void;
   onOpenPayeeModal: () => void;
   onDelete: () => void;
@@ -34,8 +36,8 @@ export function EditTransactionForm({
   isDeletingRow,
   isPaymentDisabled,
   isDepositDisabled,
-  renderColumnGroup,
   onEditorChange,
+  onReconcileCycle,
   onAccountLabelChange,
   onOpenPayeeModal,
   onDelete,
@@ -46,25 +48,25 @@ export function EditTransactionForm({
     <div className="form-transaction-row">
       <div className="form-transaction-row-top">
         <table className="w-full min-w-[1025px] table-fixed border-collapse text-sm">
-          {renderColumnGroup()}
+          <RegisterTableColumnGroup />
           <tbody>
             <tr className="align-top">
               <td className="form-control">
-                <input
+                <InputField
                   type="date"
                   value={editor.date}
                   onChange={(event) => onEditorChange("date", event.target.value)}
-                  className="input-field w-full placeholder:text-gray-400"
+                  className="w-full placeholder:text-gray-400"
                 />
               </td>
               <td className="form-control">
-                <input
+                <InputField
                   type="text"
                   value={editor.refNo}
                   onChange={(event) => onEditorChange("refNo", event.target.value)}
-                  className="input-field w-full placeholder:text-gray-400"
+                  className="w-full placeholder:text-gray-400"
                 />
-                <input type="text" value={entry.transactionType} disabled className="input-field mt-1 w-full" />
+                <InputField type="text" value={entry.transactionType} disabled className="mt-1 w-full" />
               </td>
               <td className="form-control">
                 <SelectField
@@ -74,26 +76,26 @@ export function EditTransactionForm({
                   onChange={(value) => onEditorChange("payee", value)}
                   onAddNew={onOpenPayeeModal}
                 />
-                <input
+                <InputField
                   type="text"
                   value={accountLabel}
                   disabled
                   onChange={(event) => onAccountLabelChange(event.target.value)}
                   placeholder="Account"
-                  className="input-field mt-1 w-full"
+                  className="mt-1 w-full"
                 />
               </td>
               <td className="form-control">
-                <input
+                <InputField
                   type="text"
                   value={editor.memo}
                   onChange={(event) => onEditorChange("memo", event.target.value)}
                   placeholder="Memo"
-                  className="input-field w-full placeholder:text-gray-400"
+                  className="w-full placeholder:text-gray-400"
                 />
               </td>
               <td className="form-control">
-                <input
+                <InputField
                   type="number"
                   min="0"
                   step="0.01"
@@ -101,11 +103,11 @@ export function EditTransactionForm({
                   disabled={isPaymentDisabled}
                   onChange={(event) => onEditorChange("payment", event.target.value)}
                   placeholder="0.00"
-                  className="input-field w-full text-right placeholder:text-gray-400"
+                  className="w-full text-right placeholder:text-gray-400"
                 />
               </td>
               <td className="form-control">
-                <input
+                <InputField
                   type="number"
                   min="0"
                   step="0.01"
@@ -113,10 +115,10 @@ export function EditTransactionForm({
                   disabled={isDepositDisabled}
                   onChange={(event) => onEditorChange("deposit", event.target.value)}
                   placeholder="0.00"
-                  className="input-field w-full text-right placeholder:text-gray-400"
+                  className="w-full text-right placeholder:text-gray-400"
                 />
               </td>
-              <td className="form-control text-center text-gray-400" />
+              <ReconcileStatusCell status={editor.reconcileStatus} onCycle={onReconcileCycle} />
               <td className="form-control">
                 <div className="rounded border border-gray-200 bg-gray-100 px-2 py-1 text-right text-xs text-gray-500">-</div>
               </td>

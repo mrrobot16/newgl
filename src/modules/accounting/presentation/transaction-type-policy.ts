@@ -304,3 +304,7 @@ export function toDomainTransactionType(
       return transactionTypeId;
   }
 }
+
+export function getAllBankRegisterTransactionTypes(): BankRegisterTransactionTypeOption[] {
+  return BANK_REGISTER_TRANSACTION_TYPE_CATALOG;
+}

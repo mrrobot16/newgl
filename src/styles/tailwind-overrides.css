@@ -48,6 +48,9 @@
   --gbsg-nav-bar-icon-color-inverse: #ffffff;
   --font-weight-body-semibold: 500;
   --radius-large: 8px;
+  --color-link-text: #0365AC;
+  --color-shadow: #8d9096;
+  --radius-container-overlay: 4px;
 }
 
 /*
@@ -187,11 +190,66 @@
 }
 .tw-override .page-content {
   margin: 0 30px 30px 30px;
-  padding: 15px;
+  padding: 0 15px 15px;
 }
 .tw-override .register-table {
   border-bottom: 1px solid var(--color-container-border-secondary);
+  margin-bottom: 20px;
 }
+.tw-override .form-popover {
+  max-width: 530px;
+  overflow: visible;
+  padding: 0;
+  padding-top: 5px;
+}
+
+.tw-override .dgrid-hider-menu {
+  position: absolute;
+  top: 0;
+  right: 17px;
+  width: 184px;
+  background-color: var(--color-container-background-primary);
+  border: 1px solid var(--color-container-border-primary);
+  z-index: 99999;
+  padding: 4px;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.tw-override .dgrid-03 .dgrid-hider-menu {
+  padding: 0;
+  top: 38px;
+  right: 0;
+  font-size: 13px;
+  border: none;
+  background-color: transparent;
+  height: auto !important;
+  overflow: visible;
+}
+
+.tw-override .dgrid-03 .dgrid-hider-menu .hiderMenuConnector {
+  left: 160px;
+  top: 5px;
+  width: 10px;
+  height: 10px;
+  border-color: var(--color-container-border-secondary);
+  border-width: 1px 0 0 1px;
+  border-style: solid;
+  background: var(--color-container-background-primary);
+  -webkit-transform: rotate(45deg);
+  transform: rotate(45deg);
+  position: relative;
+}
+
+.tw-override .dgrid-03 .dgrid-hider-menu .hiderMenuContainer {
+  background-color: var(--color-container-background-primary);
+  border: 1px solid var(--color-container-border-secondary);
+  border-bottom: 3px solid var(--color-shadow);
+  border-radius: var(--radius-container-overlay);
+  box-shadow: none;
+  padding: 15px 12px;
+}
+
 .tw-override .action-bar {
   background-color: #eceef1;
 }

@@ -6,6 +6,7 @@ import { ledgerEventBus } from "@/shared/event-bus";
 import type {
   Account,
   LedgerPosting,
+  ReconcileStatus,
   RegisterEntry,
   Transaction
 } from "@/modules/accounting/domain/models";
@@ -31,6 +32,7 @@ export type DraftTransactionForm = {
   memo: string;
   payment: string;
   deposit: string;
+  reconcileStatus: ReconcileStatus;
 };
 
 export type DraftTransactionErrors = Partial<
@@ -44,7 +46,14 @@ export type InlineEntryEditorInput = {
   memo: string;
   payment: string;
   deposit: string;
+  reconcileStatus: ReconcileStatus;
 };
+
+export function nextReconcileStatus(current: ReconcileStatus): ReconcileStatus {
+  if (current === "") return "C";
+  if (current === "C") return "R";
+  return "";
+}
 
 function findCounterpartyAccount(
   accounts: Account[],
@@ -160,7 +169,8 @@ export function useBankRegister() {
         accountTypeLabel: "",
         memo: "",
         payment: "",
-        deposit: ""
+        deposit: "",
+        reconcileStatus: ""
       });
       setDraftErrors({});
       setError(null);
@@ -262,6 +272,7 @@ export function useBankRegister() {
           payee: draftTransaction.payee.trim() || undefined,
           accountLabel: draftTransaction.accountTypeLabel.trim() || undefined,
           sourceAccountId: selectedAccountId,
+          reconcileStatus: draftTransaction.reconcileStatus || undefined,
           postings: selectedIsDestination
             ? [
                 { accountId: selectedAccountId, type: "DEBIT", amount },
@@ -290,6 +301,7 @@ export function useBankRegister() {
             payee: draftTransaction.payee.trim() || undefined,
             accountLabel: draftTransaction.accountTypeLabel.trim() || undefined,
             sourceAccountId: selectedAccountId,
+            reconcileStatus: draftTransaction.reconcileStatus || undefined,
             postings: [
               { accountId: selectedAccountId, type: "DEBIT", amount },
               { accountId: incomeAccount.id, type: "CREDIT", amount }
@@ -304,6 +316,7 @@ export function useBankRegister() {
             payee: draftTransaction.payee.trim() || undefined,
             accountLabel: draftTransaction.accountTypeLabel.trim() || undefined,
             sourceAccountId: selectedAccountId,
+            reconcileStatus: draftTransaction.reconcileStatus || undefined,
             postings: [
               { accountId: selectedAccountId, type: "DEBIT", amount },
               { accountId: incomeAccount.id, type: "CREDIT", amount }
@@ -330,6 +343,7 @@ export function useBankRegister() {
           payee: draftTransaction.payee.trim() || undefined,
           accountLabel: draftTransaction.accountTypeLabel.trim() || undefined,
           sourceAccountId: selectedAccountId,
+          reconcileStatus: draftTransaction.reconcileStatus || undefined,
           postings: [
             { accountId: expenseOrOffset.id, type: offsetPostingType, amount },
             { accountId: selectedAccountId, type: selectedPostingType, amount }
@@ -400,12 +414,36 @@ export function useBankRegister() {
         payee: input.payee || undefined,
         memo: input.memo || undefined,
         payment: payment > 0 ? payment : undefined,
-        deposit: deposit > 0 ? deposit : undefined
+        deposit: deposit > 0 ? deposit : undefined,
+        reconcileStatus: input.reconcileStatus
       });
       await refreshEntries();
       await refreshAccounts();
     },
     [refreshAccounts, refreshEntries, services.registerService]
+  );
+
+  const cycleDraftReconcileStatus = useCallback(() => {
+    setDraftTransaction((current) =>
+      current ? { ...current, reconcileStatus: nextReconcileStatus(current.reconcileStatus) } : current
+    );
+  }, []);
+
+  const cycleReconcileStatus = useCallback(
+    async (entryId: string) => {
+      const entry = entries.find((item) => item.id === entryId);
+      const next = nextReconcileStatus(entry?.reconcileStatus ?? "");
+      setEntries((previous) =>
+        previous.map((item) => (item.id === entryId ? { ...item, reconcileStatus: next } : item))
+      );
+      try {
+        await services.registerService.setReconcileStatus(entryId, next);
+      } catch (value: unknown) {
+        await refreshEntries();
+        setError(value instanceof Error ? value.message : "Failed to update reconcile status.");
+      }
+    },
+    [entries, refreshEntries, services.registerService]
   );
 
   const deleteRegisterEntryInline = useCallback(
@@ -434,6 +472,8 @@ export function useBankRegister() {
     setSelectedAccountId,
     addSelectedTransaction,
     cancelDraftTransaction,
+    cycleDraftReconcileStatus,
+    cycleReconcileStatus,
     deleteRegisterEntryInline,
     updateRegisterEntryInline,
     selectTransactionType,

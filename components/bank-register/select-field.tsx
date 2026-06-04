@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { InputField } from "@/components/ui/input-field";
 
 export type SelectFieldOption = {
   value: string;
@@ -20,6 +21,7 @@ type SelectFieldProps = {
   onAddNew?: () => void;
   addNewLabel?: string;
   allowCustomValue?: boolean;
+  optionSize?: "default" | "sm";
 };
 
 function SelectorChevronIcon() {
@@ -53,7 +55,8 @@ export function SelectField({
   className = "",
   onAddNew,
   addNewLabel = "+ Add new",
-  allowCustomValue = true
+  allowCustomValue = true,
+  optionSize = "default"
 }: SelectFieldProps) {
   const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
@@ -107,13 +110,17 @@ export function SelectField({
     setIsOpen(false);
   }
 
+  const optionTextClassName = optionSize === "sm" ? "text-[13px]" : "text-sm";
+  const optionLabelClassName = optionSize === "sm" ? "text-[13px] text-gray-700" : "text-left text-gray-700";
+  const optionRightLabelClassName = optionSize === "sm" ? "text-[13px] text-gray-500" : "text-right text-gray-500";
+
   return (
     <div
       ref={containerRef}
       className={`relative ${fullWidth ? "w-full min-w-0" : "min-w-fit w-fit"} ${className}`}
     >
       <div className="relative">
-        <input
+        <InputField
           type="text"
           value={query}
           disabled={disabled}
@@ -132,7 +139,7 @@ export function SelectField({
             }
             setIsOpen(true);
           }}
-          className={`selector-field ${fullWidth ? "w-full" : "w-[208px]"} h-9 rounded border border-gray-300 bg-white px-3 pr-9 font-normal leading-[1.2] text-gray-900 placeholder:text-gray-400 transition-[background-color,border-color,box-shadow] duration-200 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:cursor-not-allowed disabled:border-gray-200 disabled:bg-gray-100 disabled:text-gray-400`}
+          className={`selector-field ${fullWidth ? "w-full" : "w-[208px]"} pr-9`}
         />
         <button
           type="button"
@@ -153,7 +160,7 @@ export function SelectField({
       </div>
 
       {isOpen && !disabled ? (
-        <div className="absolute left-0 z-50 mt-1 max-h-64 min-w-[30rem] max-w-[min(90vw,56rem)] overflow-y-auto rounded border border-gray-200 bg-white py-1 shadow-md">
+        <div className="absolute left-0 z-50 mt-1 max-h-64 w-max min-w-full max-w-[min(90vw,56rem)] overflow-y-auto rounded border border-gray-200 bg-white py-1 shadow-md">
           {onAddNew ? (
             <button
               type="button"
@@ -177,12 +184,14 @@ export function SelectField({
                 onMouseDown={(event) => event.preventDefault()}
                 onClick={() => handleSelectOption(option)}
                 className={`selector-option grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-4 py-2 text-left ${
-                  option.value === value ? "selector-option-selected" : "text-sm hover:bg-gray-100"
+                  option.value === value
+                    ? `selector-option-selected ${optionTextClassName}`
+                    : `${optionTextClassName} hover:bg-gray-100`
                 }`}
               >
-                <span className="selector-option-label text-left text-gray-700">{option.label}</span>
+                <span className={`selector-option-label whitespace-nowrap ${optionLabelClassName}`}>{option.label}</span>
                 {option.rightLabel ? (
-                  <span className="shrink-0 text-right text-gray-500">{option.rightLabel}</span>
+                  <span className={`shrink-0 ${optionRightLabelClassName}`}>{option.rightLabel}</span>
                 ) : null}
               </button>
             ))
