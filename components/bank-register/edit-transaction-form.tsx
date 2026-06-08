@@ -4,14 +4,15 @@ import { SelectField } from "@/components/bank-register/select-field";
 import type { SelectFieldOption } from "@/components/bank-register/select-field";
 import { Button } from "@/components/ui/button";
 import { InputField } from "@/components/ui/input-field";
+import { isEntryLocked } from "@/modules/accounting/domain/accounting-reports";
 import type { RegisterEntry } from "@/modules/accounting/domain/models";
 import type { InlineEntryEditorInput } from "@/modules/accounting/presentation/hooks/use-bank-register";
 
 type EditTransactionFormProps = {
   entry: RegisterEntry;
   editor: InlineEntryEditorInput;
-  accountLabel: string;
   payeeOptions: SelectFieldOption[];
+  accountOptions: SelectFieldOption[];
   rowError: string | null;
   isSavingRow: boolean;
   isDeletingRow: boolean;
@@ -19,7 +20,6 @@ type EditTransactionFormProps = {
   isDepositDisabled: boolean;
   onEditorChange: (field: keyof InlineEntryEditorInput, value: string) => void;
   onReconcileCycle: () => void;
-  onAccountLabelChange: (value: string) => void;
   onOpenPayeeModal: () => void;
   onDelete: () => void;
   onCancel: () => void;
@@ -29,8 +29,8 @@ type EditTransactionFormProps = {
 export function EditTransactionForm({
   entry,
   editor,
-  accountLabel,
   payeeOptions,
+  accountOptions,
   rowError,
   isSavingRow,
   isDeletingRow,
@@ -38,12 +38,13 @@ export function EditTransactionForm({
   isDepositDisabled,
   onEditorChange,
   onReconcileCycle,
-  onAccountLabelChange,
   onOpenPayeeModal,
   onDelete,
   onCancel,
   onSave
 }: EditTransactionFormProps) {
+  const locked = isEntryLocked(entry.reconcileStatus ?? "");
+  const lockedLabel = entry.reconcileStatus === "R" ? "reconciled" : "cleared";
   return (
     <div className="form-transaction-row">
       <div className="form-transaction-row-top">
@@ -76,13 +77,13 @@ export function EditTransactionForm({
                   onChange={(value) => onEditorChange("payee", value)}
                   onAddNew={onOpenPayeeModal}
                 />
-                <InputField
-                  type="text"
-                  value={accountLabel}
-                  disabled
-                  onChange={(event) => onAccountLabelChange(event.target.value)}
+                <SelectField
+                  value={editor.accountTypeId}
+                  options={accountOptions}
                   placeholder="Account"
-                  className="mt-1 w-full"
+                  onChange={(value) => onEditorChange("accountTypeId", value)}
+                  allowCustomValue={false}
+                  disabled={locked}
                 />
               </td>
               <td className="form-control">
@@ -127,9 +128,19 @@ export function EditTransactionForm({
         </table>
       </div>
 
-      <div className="form-transaction-row-bottom flex justify-end gap-2">
+      <div className="form-transaction-row-bottom flex items-center justify-end gap-2">
+        {locked ? (
+          <p className="mb-1 mr-auto text-xs text-amber-600">
+            This transaction is {lockedLabel} and is locked. Clear the reconcile mark on the row to
+            edit it, or create a reversal.
+          </p>
+        ) : null}
         {rowError ? <p className="mb-1 text-xs text-red-600">{rowError}</p> : null}
-        <Button variant="secondary" disabled={isDeletingRow || isSavingRow} onClick={onDelete}>
+        <Button
+          variant="secondary"
+          disabled={isDeletingRow || isSavingRow || locked}
+          onClick={onDelete}
+        >
           Delete
         </Button>
         <Button variant="secondary" disabled={isDeletingRow || isSavingRow} onClick={() => undefined}>
@@ -138,7 +149,11 @@ export function EditTransactionForm({
         <Button variant="secondary" disabled={isDeletingRow || isSavingRow} onClick={onCancel}>
           Cancel
         </Button>
-        <Button variant="primary" disabled={isDeletingRow || isSavingRow} onClick={onSave}>
+        <Button
+          variant="primary"
+          disabled={isDeletingRow || isSavingRow || locked}
+          onClick={onSave}
+        >
           {isSavingRow ? "Saving..." : "Save"}
         </Button>
       </div>
