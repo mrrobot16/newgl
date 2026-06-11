@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { getServiceContainer } from "@/lib/services/service-container";
+import { getServiceContainer } from "@/lib/services/service-container-v2";
 import { ledgerEventBus } from "@/shared/event-bus";
 import type {
   Account,
