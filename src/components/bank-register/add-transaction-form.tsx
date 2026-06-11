@@ -7,7 +7,7 @@ import { InputField } from "@/components/ui/input-field";
 import type {
   DraftTransactionErrors,
   DraftTransactionForm
-} from "@/modules/accounting/presentation/hooks/use-bank-register";
+} from "@hooks/use-bank-register";
 
 type AddTransactionFormProps = {
   draftTransaction: DraftTransactionForm;

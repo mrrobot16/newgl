@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { InputField } from "@/components/ui/input-field";
 import { isEntryLocked } from "@/modules/accounting/domain/accounting-reports";
 import type { RegisterEntry } from "@/modules/accounting/domain/models";
-import type { InlineEntryEditorInput } from "@/modules/accounting/presentation/hooks/use-bank-register";
+import type { InlineEntryEditorInput } from "@hooks/use-bank-register";
 
 type EditTransactionFormProps = {
   entry: RegisterEntry;

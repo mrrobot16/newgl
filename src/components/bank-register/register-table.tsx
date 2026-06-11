@@ -3,9 +3,9 @@ import { AddTransactionForm } from "@/components/bank-register/add-transaction-f
 import { ActionToolbar } from "@/components/bank-register/action-toolbar";
 import { EditTransactionForm } from "@/components/bank-register/edit-transaction-form";
 import { FilterFormPopover } from "@/components/bank-register/filter-form-popover";
-import { useRegisterExport } from "@/components/bank-register/hooks/use-register-export";
-import { useRegisterFilters } from "@/components/bank-register/hooks/use-register-filters";
-import { useRegisterPrint } from "@/components/bank-register/hooks/use-register-print";
+import { useRegisterExport } from "@hooks/use-register-export";
+import { useRegisterFilters } from "@hooks/use-register-filters";
+import { useRegisterPrint } from "@hooks/use-register-print";
 import { PayeeSideModal } from "@/components/bank-register/payee-side-modal";
 import type { PayeeOption } from "@/components/bank-register/payee-side-modal";
 import { RegisterTableColumnGroup } from "@/components/bank-register/register-table-column-group";
@@ -14,15 +14,20 @@ import { SelectField } from "@/components/bank-register/select-field";
 import type { SelectFieldOption } from "@/components/bank-register/select-field";
 import { TablePagination } from "@/components/bank-register/table-pagination";
 import { Funnel, Printer, Settings, Upload } from "lucide-react";
+import {
+  REGISTER_INFLOW_ROW_TYPES,
+  REGISTER_OUTFLOW_ROW_TYPES,
+  REGISTER_ROWS_PER_PAGE_OPTIONS
+} from "@/constants/ui";
 import type { RegisterEntry } from "@/modules/accounting/domain/models";
 import {
   nextReconcileStatus
-} from "@/modules/accounting/presentation/hooks/use-bank-register";
+} from "@hooks/use-bank-register";
 import type {
   DraftTransactionErrors,
   DraftTransactionForm,
   InlineEntryEditorInput
-} from "@/modules/accounting/presentation/hooks/use-bank-register";
+} from "@hooks/use-bank-register";
 import {
   isAccountFieldDisabledForTransactionType,
   isInflowTransactionType,
@@ -76,21 +81,6 @@ function formatTransactionTypeLabel(transactionType: RegisterEntry["transactionT
     .map((segment) => (segment ? segment[0].toUpperCase() + segment.slice(1) : segment))
     .join(" ");
 }
-
-const INFLOW_ROW_TYPES = new Set<RegisterEntry["transactionType"]>([
-  "DEPOSIT",
-  "SALES_RECEIPT",
-  "RECEIVE_PAYMENT"
-]);
-
-const OUTFLOW_ROW_TYPES = new Set<RegisterEntry["transactionType"]>([
-  "CHECK",
-  "BILL_PAYMENT",
-  "REFUND",
-  "EXPENSE"
-]);
-
-const ROWS_PER_PAGE_OPTIONS = [4, 40, 60, 80, 100, 125, 150] as const;
 
 export function RegisterTable({
   entries,
@@ -532,7 +522,7 @@ export function RegisterTable({
                       setCurrentPage(1);
                       setIsSettingsPopoverOpen(false);
                     }}
-                    options={ROWS_PER_PAGE_OPTIONS.map((option) => ({
+                    options={REGISTER_ROWS_PER_PAGE_OPTIONS.map((option) => ({
                       value: String(option),
                       label: String(option)
                     }))}
@@ -599,8 +589,8 @@ export function RegisterTable({
                           rowError={rowError}
                           isSavingRow={isSavingRow}
                           isDeletingRow={isDeletingRow}
-                          isPaymentDisabled={INFLOW_ROW_TYPES.has(selectedEntry.transactionType)}
-                          isDepositDisabled={OUTFLOW_ROW_TYPES.has(selectedEntry.transactionType)}
+                          isPaymentDisabled={REGISTER_INFLOW_ROW_TYPES.has(selectedEntry.transactionType)}
+                          isDepositDisabled={REGISTER_OUTFLOW_ROW_TYPES.has(selectedEntry.transactionType)}
                           onEditorChange={(field, value) => setEditor((current) => ({ ...current, [field]: value }))}
                           onReconcileCycle={cycleEditorReconcileStatus}
                           onOpenPayeeModal={() => openPayeeModal("row")}

@@ -26,11 +26,14 @@
       "@/*": [
         "./src/*"
       ],
+      "@hooks/*": [
+        "./src/hooks/*"
+      ],
       "@/components/*": [
-        "./components/*"
+        "./src/components/*"
       ],
       "@/lib/*": [
-        "./lib/*"
+        "./src/lib/*"
       ]
     }
   },

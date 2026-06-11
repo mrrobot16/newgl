@@ -207,7 +207,7 @@ const SEED_REGISTER_TRANSACTIONS: SeedRegisterTransactionSpec[] = [
     memo: "Office supplies",
     payee: "Office Depot",
     sourceAccountName: "Cash on hand",
-    counterpartyAccountName: "Personal expense",
+    counterpartyAccountName: "Materials and supplies",
     amount: 145.5,
     flow: "OUTFLOW"
   },
@@ -229,7 +229,7 @@ const SEED_REGISTER_TRANSACTIONS: SeedRegisterTransactionSpec[] = [
     memo: "Client payment invoice #44",
     payee: "Client A",
     sourceAccountName: "Cash on hand",
-    counterpartyAccountName: "Personal income",
+    counterpartyAccountName: "Services",
     amount: 680,
     flow: "INFLOW",
     reconcileStatus: "R"
@@ -252,7 +252,7 @@ const SEED_REGISTER_TRANSACTIONS: SeedRegisterTransactionSpec[] = [
     memo: "Utility bill payment",
     payee: "City Utilities",
     sourceAccountName: "Cash on hand",
-    counterpartyAccountName: "Personal expense",
+    counterpartyAccountName: "Utilities (business property)",
     amount: 110.75,
     flow: "OUTFLOW"
   },
@@ -263,7 +263,7 @@ const SEED_REGISTER_TRANSACTIONS: SeedRegisterTransactionSpec[] = [
     memo: "Misc sales deposit",
     payee: "POS batch",
     sourceAccountName: "Cash on hand",
-    counterpartyAccountName: "Personal income",
+    counterpartyAccountName: "Sales",
     amount: 420.35,
     flow: "INFLOW"
   },
@@ -305,11 +305,11 @@ const SEED_REGISTER_TRANSACTIONS: SeedRegisterTransactionSpec[] = [
     type: "DEPOSIT",
     date: "2026-05-21",
     ref: "TX-1011",
-    memo: "Owner top-up",
-    payee: "Owner",
+    memo: "Unapplied customer payment",
+    payee: "Customer unapplied",
     sourceAccountName: "Cash on hand",
-    counterpartyAccountName: "Owners investment",
-    amount: 500,
+    counterpartyAccountName: "Unapplied Cash Payment Income",
+    amount: 200,
     flow: "INFLOW"
   },
   {
