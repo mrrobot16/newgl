@@ -2,6 +2,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { RegisterEntry } from "@/modules/accounting/domain/models";
 import { getAllBankRegisterTransactionTypes } from "@/modules/accounting/presentation/transaction-type-policy";
 import type { SelectFieldOption } from "@/components/bank-register/select-field";
+import {
+  REGISTER_DATE_FILTER_OPTIONS,
+  REGISTER_FILTER_INITIAL_STATE,
+  REGISTER_RECONCILE_FILTER_OPTIONS
+} from "@/constants/ui";
 
 type ReconcileFilterValue = "ALL" | "RECONCILED" | "CLEAR" | "NO_STATUS" | "NO_RECONCILED";
 type DateFilterValue =
@@ -42,38 +47,7 @@ type ActiveFilterChip = {
   label: string;
 };
 
-const DATE_FILTER_OPTIONS: SelectFieldOption[] = [
-  { value: "ALL_DATES", label: "All dates" },
-  { value: "CUSTOM", label: "Custom" },
-  { value: "TODAY", label: "Today" },
-  { value: "YESTERDAY", label: "Yesterday" },
-  { value: "THIS_WEEK", label: "This week" },
-  { value: "THIS_MONTH", label: "This month" },
-  { value: "THIS_QUARTER", label: "This quarter" },
-  { value: "THIS_YEAR", label: "This year" },
-  { value: "LAST_WEEK", label: "Last week" },
-  { value: "LAST_MONTH", label: "Last month" },
-  { value: "LAST_QUARTER", label: "Last quarter" },
-  { value: "LAST_YEAR", label: "Last year" }
-];
-
-const RECONCILE_FILTER_OPTIONS: SelectFieldOption[] = [
-  { value: "ALL", label: "All" },
-  { value: "RECONCILED", label: "Reconciled" },
-  { value: "CLEAR", label: "Clear" },
-  { value: "NO_STATUS", label: "No status" },
-  { value: "NO_RECONCILED", label: "No reconciled" }
-];
-
-const INITIAL_FILTER_STATE: RegisterFilterState = {
-  find: "",
-  reconcileStatus: "ALL",
-  transactionType: "ALL",
-  payee: "ALL",
-  datePreset: "ALL_DATES",
-  from: "",
-  to: ""
-};
+const INITIAL_FILTER_STATE: RegisterFilterState = REGISTER_FILTER_INITIAL_STATE as RegisterFilterState;
 
 function toIsoDate(value: Date): string {
   return value.toISOString().slice(0, 10);
@@ -216,11 +190,11 @@ export function useRegisterFilters({ entries, payeeOptions, formatTransactionTyp
   );
 
   const reconcileFilterLabelByValue = useMemo(
-    () => new Map(RECONCILE_FILTER_OPTIONS.map((option) => [option.value, option.label])),
+    () => new Map(REGISTER_RECONCILE_FILTER_OPTIONS.map((option) => [option.value, option.label])),
     []
   );
   const dateFilterLabelByValue = useMemo(
-    () => new Map(DATE_FILTER_OPTIONS.map((option) => [option.value, option.label])),
+    () => new Map(REGISTER_DATE_FILTER_OPTIONS.map((option) => [option.value, option.label])),
     []
   );
   const transactionTypeLabelByValue = useMemo(
@@ -365,8 +339,8 @@ export function useRegisterFilters({ entries, payeeOptions, formatTransactionTyp
     filteredEntries,
     hasActiveFilters,
     activeFilterChips,
-    reconcileFilterOptions: RECONCILE_FILTER_OPTIONS,
-    dateFilterOptions: DATE_FILTER_OPTIONS,
+    reconcileFilterOptions: REGISTER_RECONCILE_FILTER_OPTIONS,
+    dateFilterOptions: REGISTER_DATE_FILTER_OPTIONS,
     transactionTypeOptions,
     payeeFilterOptions,
     handleFindChange,

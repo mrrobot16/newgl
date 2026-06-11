@@ -5,25 +5,9 @@ import { AccountSelector } from "@/components/bank-register/account-selector";
 import { RegisterTable } from "@/components/bank-register/register-table";
 import { getRegisterTitle } from "@/components/bank-register/register-title";
 import type { SelectFieldOption } from "@/components/bank-register/select-field";
-import { DEFAULT_TOP_HEADER_USER_NAME } from "@/components/layout/top-header";
-import type { Account } from "@/modules/accounting/domain/models";
+import { ACCOUNT_CATEGORY_LABELS, DEFAULT_TOP_HEADER_USER_NAME } from "@/constants/ui";
 import { isRegisterAccountCategory } from "@/modules/accounting/presentation/transaction-type-policy";
-import { useBankRegister } from "@/modules/accounting/presentation/hooks/use-bank-register";
-
-const ACCOUNT_CATEGORY_LABELS: Record<Account["category"], string> = {
-  ACCOUNTS_RECEIVABLE: "Accounts Receivable",
-  BANK: "Bank",
-  CREDIT_CARD: "Credit Card",
-  EQUITY: "Equity",
-  EXPENSE: "Expense",
-  FIXED_ASSET: "Fixed Asset",
-  INCOME: "Income",
-  LONG_TERM_LIABILITY: "Long Term Liability",
-  OTHER_CURRENT_ASSET: "Other Current Asset",
-  OTHER_CURRENT_LIABILITY: "Other Current Liability",
-  OTHER_EXPENSE: "Other Expense",
-  OTHER_INCOME: "Other Income"
-};
+import { useBankRegister } from "@hooks/use-bank-register";
 
 export function BankRegisterLayout() {
   const {

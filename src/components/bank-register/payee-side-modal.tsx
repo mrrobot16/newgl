@@ -4,6 +4,11 @@ import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { InputField } from "@/components/ui/input-field";
+import {
+  PAYEE_MODAL_INITIAL_CUSTOMER_FORM,
+  PAYEE_MODAL_INITIAL_EMPLOYEE_FORM,
+  PAYEE_MODAL_INITIAL_VENDOR_FORM
+} from "@/constants/ui";
 
 export type PayeeKind = "CUSTOMER" | "VENDOR" | "EMPLOYEE";
 
@@ -24,85 +29,6 @@ type CollapsibleCardProps = {
   icon: string;
   children: ReactNode;
   initiallyOpen?: boolean;
-};
-
-const INITIAL_VENDOR_FORM = {
-  companyName: "",
-  vendorDisplayName: "",
-  title: "",
-  firstName: "",
-  middleName: "",
-  lastName: "",
-  suffix: "",
-  email: "",
-  phoneNumber: "",
-  cc: "",
-  bcc: "",
-  mobileNumber: "",
-  fax: "",
-  other: "",
-  website: "",
-  nameOnChecks: "",
-  street1: "",
-  street2: "",
-  city: "",
-  state: "",
-  zip: "",
-  country: "",
-  notes: "",
-  attachments: "",
-  achBankAccount: "",
-  achRouting: "",
-  salesTaxId: "",
-  terms: "Due on receipt",
-  accountNo: "",
-  defaultExpenseCategory: "Expense Option 1",
-  openingBalance: "",
-  openingBalanceAsOf: ""
-};
-
-const INITIAL_CUSTOMER_FORM = {
-  title: "",
-  firstName: "",
-  middleName: "",
-  lastName: "",
-  suffix: "",
-  companyName: "",
-  displayName: "",
-  email: "",
-  phoneNumber: "",
-  cc: "",
-  bcc: "",
-  mobileNumber: "",
-  fax: "",
-  other: "",
-  website: "",
-  nameOnChecks: "",
-  isSubCustomer: false,
-  street1: "",
-  street2: "",
-  city: "",
-  state: "",
-  zip: "",
-  country: "",
-  shippingSameAsBilling: true,
-  notes: "",
-  attachments: "",
-  primaryPaymentMethod: "ACH",
-  terms: "Due on receipt",
-  salesFormDeliveryOptions: "",
-  invoiceLanguage: "English",
-  exemptionDetails: "",
-  openingBalance: "",
-  openingBalanceAsOf: ""
-};
-
-const INITIAL_EMPLOYEE_FORM = {
-  firstName: "",
-  middleInitial: "",
-  lastName: "",
-  email: "",
-  hireDate: ""
 };
 
 function CollapsibleCard({ title, icon, children, initiallyOpen = true }: CollapsibleCardProps) {
@@ -180,10 +106,10 @@ function SelectField({
 
 export function PayeeSideModal({ open, onClose, onSave }: PayeeSideModalProps) {
   const [kind, setKind] = useState<PayeeKind>("VENDOR");
-  const [vendor, setVendor] = useState(INITIAL_VENDOR_FORM);
-  const [customer, setCustomer] = useState(INITIAL_CUSTOMER_FORM);
+  const [vendor, setVendor] = useState({ ...PAYEE_MODAL_INITIAL_VENDOR_FORM });
+  const [customer, setCustomer] = useState({ ...PAYEE_MODAL_INITIAL_CUSTOMER_FORM });
   const [employeeName, setEmployeeName] = useState("");
-  const [employee, setEmployee] = useState(INITIAL_EMPLOYEE_FORM);
+  const [employee, setEmployee] = useState({ ...PAYEE_MODAL_INITIAL_EMPLOYEE_FORM });
   const [error, setError] = useState<string | null>(null);
 
   const resolvedName = useMemo(() => {
@@ -208,10 +134,10 @@ export function PayeeSideModal({ open, onClose, onSave }: PayeeSideModalProps) {
 
   function resetForms() {
     setKind("VENDOR");
-    setVendor(INITIAL_VENDOR_FORM);
-    setCustomer(INITIAL_CUSTOMER_FORM);
+    setVendor({ ...PAYEE_MODAL_INITIAL_VENDOR_FORM });
+    setCustomer({ ...PAYEE_MODAL_INITIAL_CUSTOMER_FORM });
     setEmployeeName("");
-    setEmployee(INITIAL_EMPLOYEE_FORM);
+    setEmployee({ ...PAYEE_MODAL_INITIAL_EMPLOYEE_FORM });
     setError(null);
   }
 

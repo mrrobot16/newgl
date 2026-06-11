@@ -1,4 +1,4 @@
-export const DEFAULT_TOP_HEADER_USER_NAME = "John Doe";
+import { DEFAULT_TOP_HEADER_USER_NAME } from "@/constants/ui";
 
 type TopHeaderProps = {
   userName?: string;

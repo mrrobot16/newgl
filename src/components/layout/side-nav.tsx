@@ -32,6 +32,7 @@ export function SideNav() {
   const pathname = usePathname();
   const isHomeSelected = pathname === "/";
   const isAccountingSelected = pathname.startsWith("/register");
+  const isBooksSelected = pathname.startsWith("/reports");
 
   return (
     <aside className="side-nav flex h-full w-[73px] flex-col justify-between bg-[#f0f4f6]">
@@ -43,7 +44,7 @@ export function SideNav() {
         <div className="mx-[4px] flex flex-col">
           <NavSquareItem label="Home" icon={Home} href="/" active={isHomeSelected} />
           <NavSquareItem label="Accounting" icon={Wallet} href="/register" active={isAccountingSelected} />
-          <NavSquareItem label="Books" icon={BookOpen} href="/register" />
+          <NavSquareItem label="Reports" icon={BookOpen} href="/reports" active={isBooksSelected} />
         </div>
       </div>
 
